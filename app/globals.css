@@ -1,0 +1,342 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Nos réglages perso pour être sûr que ça prend tout l'écran */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Important pour éviter les scrollbars doubles */
+  background-color: #111;
+  color: white;
+}
+/* Positionnement du menu */
+.menu-position {
+  position: fixed;
+  top: 30px; /* <--- C'est ici ! (C'était 150px avant) */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+
+/* Style des boutons (texte blanc forcé) */
+.menu-btn {
+  color: white !important; /* Force le blanc partout */
+  background: transparent;
+  margin: 0 20px; /* <--- ESPACEMENT ENTRE LES BOUTONS */
+  cursor: pointer;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  transition: all 0.3s ease;
+}
+
+.menu-btn:hover {
+  transform: scale(1.05);
+}
+
+.menu-btn-active {
+  transform: scale(1.1);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+}
+/* --- SECTION MOI (POSTER - TAILLE RÉDUITE) --- */
+.poster-container {
+  position: fixed;
+  top: 50%;
+  left: 5%;
+  transform: translateY(-50%);
+  width: 800px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(24px);
+  padding: 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  z-index: 30;
+  /* Pas de bordure */
+}
+
+.poster-title {
+  font-size: 8rem; 
+  font-weight: 900;
+  color: white;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  margin-bottom: 1.5rem;
+}
+
+.poster-separator {
+  width: 8rem;
+  height: 0.75rem;
+  background-color: white;
+  margin-bottom: 2rem;
+}
+
+.poster-identity {
+  font-size: 3.5rem;
+  font-weight: 300;
+  line-height: 1;
+  color: #f3f4f6;
+  margin-bottom: 1.5rem;
+}
+
+.poster-bio {
+  font-size: 1.3rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+}
+
+.poster-quote-box {
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  border-left: 6px solid white;
+  margin-bottom: 1.5rem;
+}
+
+.poster-quote-text {
+  font-size: 1.6rem;
+  font-style: italic;
+  font-weight: 500;
+  color: white;
+  line-height: 1.3;
+}
+
+.poster-footer {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  padding-top: 1rem;
+}
+
+
+/* --- SECTION SKILLS (GAUCHE & TAILLE NORMALE) --- */
+.skills-container {
+  position: fixed;
+  top: 50%;
+  left: 5%; /* C'est ici que ça se passe : LEFT */
+  transform: translateY(-50%);
+  width: 700px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  z-index: 30;
+  text-align: left;
+}
+
+.skills-title {
+  font-size: 6rem;
+  font-weight: 900;
+  color: white;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  margin-bottom: 2rem;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.skills-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.skills-category {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.skills-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.skills-list li {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.4;
+  margin-bottom: 0.3rem;
+}
+.project-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 500px;
+  background: rgba(10, 10, 10, 0.95); /* Presque noir opaque */
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto;
+  pointer-events: auto;
+  z-index: 20;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+}
+
+.sidebar-content {
+  padding: 2rem;
+  margin-top: 8rem; /* Place pour le menu */
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
+.sidebar-title {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.sidebar-image-container {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.3s;
+}
+.sidebar-image-container:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-img {
+  width: 100%;
+  height: auto;
+  opacity: 0.8;
+  transition: opacity 0.5s;
+}
+.sidebar-image-container:hover .sidebar-img {
+  opacity: 1;
+}
+
+.sidebar-caption {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.25rem;
+}
+
+.sidebar-caption-text {
+  font-size: 0.6rem;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-footer {
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+}
+/* --- SECTION EXPÉRIENCES (TIMELINE) --- */
+.experience-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centré au milieu */
+  width: 900px;
+  height: 70vh; /* Hauteur max */
+  background: rgba(0, 0, 0, 0.6); /* Plus sombre */
+  backdrop-filter: blur(30px);
+  padding: 4rem;
+  border-radius: 2rem;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+  pointer-events: auto;
+  z-index: 40;
+  overflow-y: auto; /* Scrollable si trop long */
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 4rem;
+  position: relative;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.timeline-item:hover {
+  opacity: 1;
+}
+
+/* La ligne verticale */
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 145px; /* Ajuster selon la largeur de la date */
+  top: 0;
+  bottom: -3rem; /* Pour lier au suivant */
+  width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.timeline-item:last-child::before {
+  display: none; /* Pas de ligne après le dernier */
+}
+
+.timeline-year {
+  font-size: 4rem;
+  font-weight: 900;
+  color: white;
+  min-width: 150px;
+  text-align: right;
+  line-height: 1;
+}
+
+.timeline-content {
+  padding-top: 0.5rem;
+}
+
+.timeline-role {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.timeline-company {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #aaa;
+  margin-bottom: 1rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.timeline-desc {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  max-width: 500px;
+}
