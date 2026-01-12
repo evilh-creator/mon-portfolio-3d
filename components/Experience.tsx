@@ -3,18 +3,17 @@
 import { Turntable } from "./Turntable";
 import { Vinyl } from "./Vinyl";
 import { ActiveVinyl } from "./ActiveVinyl";
-import { Speaker } from "./Speaker";
 import { GoldRecord } from "./GoldRecord";
 import { projects } from "@/data/projects";
-import { OrbitControls, useGLTF, useTexture, Environment, Float, ContactShadows } from "@react-three/drei";
-import { CameraManager } from "./CameraManager";
+import { OrbitControls, useGLTF, useTexture, Float, ContactShadows, Environment } from "@react-three/drei";import { CameraManager } from "./CameraManager";
 import { useStore } from "@/store";
 import { RepeatWrapping } from "three"; 
 import { GroupProps } from "@react-three/fiber";
 import { useMemo } from 'react';
 import * as THREE from 'three';
+import { Rack } from "./Rack"; // Adapte le chemin si nécessaire
 
-// --- NOUVEAUX COMPOSANTS ASSETS (GLB) ---
+// --- COMPOSANTS ASSETS (GLB) ---
 
 function SofaModel(props: GroupProps) {
   const { scene } = useGLTF('/sofa.glb');
@@ -33,17 +32,26 @@ function TableModel(props: GroupProps) {
   const clone = scene.clone();
   return <primitive object={clone} {...props} />;
 }
+
 function CarpetModel(props: GroupProps) {
   const { scene } = useGLTF('/carpet.glb');
   const clone = scene.clone();
   return <primitive object={clone} {...props} />;
 }
+
 function SpeakerModel(props: GroupProps) {
   const { scene } = useGLTF('/speaker.glb');
   const clone = scene.clone();
   return <primitive object={clone} {...props} />;
 }
-// --- COMPOSANT CABLE (MIS À JOUR) ---
+
+function NotebookModel(props: GroupProps) {
+  const { scene } = useGLTF('/notebook.glb');
+  const clone = scene.clone();
+  return <primitive object={clone} {...props} />;
+}
+
+// --- COMPOSANT CABLE ---
 function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: number[], mid: number[], end: number[], color?: string, thickness?: number }) {
   const curve = useMemo(() => {
     return new THREE.CatmullRomCurve3([
@@ -55,20 +63,12 @@ function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: n
 
   return (
     <mesh>
-      {/* thickness contrôle l'épaisseur */}
       <tubeGeometry args={[curve, 20, thickness, 8, false]} />
       <meshStandardMaterial color={color} roughness={0.6} />
     </mesh>
   );
 }
 
-function NotebookModel(props: GroupProps) {
-  const { scene } = useGLTF('/notebook.glb');
-  // On clone pour éviter les soucis si on en met plusieurs
-  const clone = scene.clone();
-  // On applique les props (position, rotation, onClick...) à l'objet 3D
-  return <primitive object={clone} {...props} />;
-}
 export const Experience = () => {
   // Textures des murs et posters
   const textures = useTexture({
@@ -84,16 +84,73 @@ export const Experience = () => {
   textures.wall.repeat.set(4, 2); 
 
   const { setFocus, focus, activeProject, setActiveProject } = useStore();
+  // --- AJOUT : Fonction pour gérer le clic "Aller-Retour" ---
+  const handleToggle = (target: 'intro' | 'poster' | 'turntable' | 'record' | 'experience', e: any) => {
+    e.stopPropagation(); 
+    setActiveProject(null); // On ferme les projets éventuels
+    
+    // Si on est déjà sur l'élément, on revient à l'intro. Sinon, on zoom dessus.
+    if (focus === target) {
+        setFocus('intro');
+    } else {
+        setFocus(target);
+    }
+  };
   
-
   return (
     <>
       <CameraManager /> 
       
-      <ambientLight intensity={0.8} />
-      <Environment preset="city" environmentIntensity={1} />
-      <spotLight position={[0, 3, 2]} angle={0.5} penumbra={1} intensity={20} color={"#ffecd1"} castShadow />
-      
+      {/* ======================================================== */}
+      {/* --- AMBIANCE "GOLDEN HOUR" (FENÊTRE À DROITE) --- */}
+      {/* ======================================================== */}
+
+      {/* 1. Fond : Un crépuscule sombre (Violet très foncé) */}
+      <color attach="background" args={['#150a1a']} />
+      <fogExp2 attach="fog" args={['#150a1a', 0.12]} /> 
+
+      {/* 2. Lumière Ambiante (Les ombres) */}
+      {/* On utilise du violet pour contraster avec l'orange du soleil */}
+      <ambientLight intensity={0.5} color="#4a3b59" />
+
+      {/* 3. LE SOLEIL (Venant de la fenêtre fictive à DROITE) */}
+      <spotLight
+          position={[7, 2, 2]}       // Très à droite, assez bas (coucher de soleil), légèrement devant
+          target-position={[0, 0, 0]} // Vise le centre de la table
+          intensity={800}              // Très puissant car c'est le soleil direct
+          color="#ff9545"             // Orange chaud / Doré
+          angle={0.4}                 // Angle fermé pour imiter la lumière passant par une fenêtre
+          penumbra={0.3}              // Bords de lumière légèrement doux
+          castShadow                  // Projette les ombres
+          shadow-bias={-0.0005}       // Évite les bugs d'ombre
+          shadow-mapSize-width={2048} // Ombres nettes et jolies
+          shadow-mapSize-height={2048}
+      />
+
+      {/* 4. Reflet chaud sur le sol (Simulation du rebond de lumière) */}
+      {/* Lumière douce qui vient du sol pour simuler le soleil qui tape par terre */}
+      <pointLight 
+          position={[2, 0.5, 0]} 
+          intensity={5} 
+          color="#ffc480" 
+          distance={4} 
+          decay={2} 
+      />
+
+      {/* 5. Fill Light (Débouchage à gauche) */}
+      {/* Une lumière très douce et froide à gauche pour que le côté ombre ne soit pas noir total */}
+      <pointLight 
+          position={[-3, 2, -1]} 
+          intensity={2} 
+          color="#6b6b90" // Bleu grisatre
+          distance={5} 
+      />
+
+      {/* Environnement pour de jolis reflets sur le vinyle (Mode Sunset) */}
+      <Environment preset="sunset" environmentIntensity={0.5} />
+
+      {/* ======================================================== */}
+
       <OrbitControls makeDefault enableZoom={false} maxPolarAngle={Math.PI / 2 - 0.1} />
 
       {/* --- GROUPE PRINCIPAL --- */}
@@ -110,7 +167,6 @@ export const Experience = () => {
         </mesh>
         
         {/* --- TAPIS (GLB) --- */}
-        {/* J'ai enlevé la rotation X de -90° car un modèle 3D est généralement déjà plat */}
         <CarpetModel 
             position={[0, 0.01, -0.5]} 
             scale={3} 
@@ -127,24 +183,19 @@ export const Experience = () => {
           />
         </mesh>
 
-        {/* --- NOUVEAU : LE CANAPÉ (GLB) --- */}
-        {/* Remplace l'ancien code Sofa. Ajuste scale/position selon ton export Blender */}
+        {/* --- CANAPÉ --- */}
         <SofaModel 
             position={[3.5, 0, -1.5]} 
             rotation={[0, -0.5, 0]} 
             scale={1.5} 
         />
 
-
         {/* --- DÉCORATION MURALE --- */}
         <group position={[0, 0, -2.95]}> 
             {/* POSTER (Moi) */}
             <mesh 
                 position={[-0.8, 2.5, 0]} 
-                onClick={(e) => { 
-                    e.stopPropagation(); setActiveProject(null);
-                    setFocus(focus === 'poster' ? 'intro' : 'poster'); 
-                }}
+                onClick={(e) => handleToggle('poster', e)} // <--- MODIFIÉ
                 onPointerOver={() => document.body.style.cursor = 'pointer'}
                 onPointerOut={() => document.body.style.cursor = 'auto'}
             >
@@ -152,16 +203,14 @@ export const Experience = () => {
                 <meshBasicMaterial map={textures.poster} /> 
             </mesh>
 
-          {/* --- 6 MOUSSES ACOUSTIQUES (COLLÉES) --- */}
-            {/* Grille serrée (Ecart réduit à 0.5) */}
+          {/* --- 6 MOUSSES ACOUSTIQUES --- */}
             <group position={[-3, 2.5, 0]}>
-                
                 {/* Colonne Gauche */}
                 <FoamModel position={[0, 0.3, 0]}   rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
                 <FoamModel position={[0, 0, 0]}     rotation={[Math.PI / 2, 0, 0]} scale={1} />
                 <FoamModel position={[0, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
 
-                {/* Colonne Droite (Collée à 0.5 sur l'axe X) */}
+                {/* Colonne Droite */}
                 <FoamModel position={[0.3, 0.3, 0]}   rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
                 <FoamModel position={[0.3, 0, 0]}     rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
                 <FoamModel position={[0.3, -0.3, 0]}  rotation={[Math.PI / 2, 0, 0]} scale={1} />
@@ -169,10 +218,8 @@ export const Experience = () => {
                 <FoamModel position={[0.6, 0.3, 0]}   rotation={[Math.PI / 2, 0, 0]} scale={1} />
                 <FoamModel position={[0.6, 0, 0]}     rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
                 <FoamModel position={[0.6, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
-
             </group>
             
-
             {/* Cadre Horizontal (Haut) */}
             <mesh position={[1.2, 3.6, 0]}>
                  <planeGeometry args={[1.2, 0.7]} />
@@ -181,10 +228,7 @@ export const Experience = () => {
 
             {/* DISQUE D'OR (Bouton Skills) */}
             <group 
-                onClick={(e) => { 
-                    e.stopPropagation(); setActiveProject(null);
-                    setFocus(focus === 'record' ? 'intro' : 'record'); 
-                }}
+                onClick={(e) => handleToggle('record', e)} // <--- MODIFIÉ
                 onPointerOver={() => document.body.style.cursor = 'pointer'}
                 onPointerOut={() => document.body.style.cursor = 'auto'}
             >
@@ -202,88 +246,118 @@ export const Experience = () => {
             </mesh>
         </group>
 
-        {/* --- NOUVEAU : TABLE (GLB) --- */}
-        {/* Remplace les <boxGeometry> "MEUBLES & SETUP" */}
+        {/* --- TABLE --- */}
         <TableModel 
             position={[0, -0.2, -0.5]} 
             scale={1.2} 
+            receiveShadow // <--- AJOUTE ÇA
         />
         
-      {/* --- ENCEINTES (GLB) --- */}
-        {/* Posées sur la table. Ajuste le Y (0.85) si elles rentrent dans le meuble */}
-        
-        {/* Enceinte Gauche */}
+        {/* --- ENCEINTES --- */}
         <SpeakerModel 
             position={[-1, 0.7, -0.6]} 
-            rotation={[0, 0.5, 0]} // Tournée vers le centre
+            rotation={[0, 0.5, 0]} 
             scale={3} 
+            castShadow    // <--- AJOUTE ÇA
         />
-
-        {/* Enceinte Droite */}
         <SpeakerModel 
             position={[1, 0.7, -0.6]} 
-            rotation={[0, -0.5, 0]} // Tournée vers le centre
+            rotation={[0, -0.5, 0]} 
             scale={3} 
+            castShadow    // <--- AJOUTE ÇA
         />
+
         {/* --- CABLES AUDIO --- */}
-        
-        {/* Câble Gauche */}
         <Cable 
-            start={[-1.15, 0.9, -0.7]}  // Derrière l'enceinte gauche
-            mid={[-0.2, 0.71, -1]}  // Touche presque la table
-            end={[0.1, 0.75, -0.6]}   // Va vers la platine (Input L)
+            start={[-1.15, 0.9, -0.7]}  
+            mid={[-0.2, 0.71, -1]} 
+            end={[0.1, 0.75, -0.6]}   
         />
-
-        {/* Câble Droit */}
         <Cable 
-            start={[1.15, 0.9, -0.7]}   // Derrière l'enceinte droite
-            mid={[0, 0.71, -1]}   // Touche presque la table
-            end={[0.1, 0.75, -0.6]}    // Va vers la platine (Input R)
+            start={[1.15, 0.9, -0.7]}   
+            mid={[0, 0.71, -1]}   
+            end={[0.1, 0.75, -0.6]}    
         />
-        {/* --- CABLE D'ALIMENTATION (GRIS & FIN) --- */}
+        {/* --- CABLE ALIM --- */}
         <Cable 
-            start={[0, 0.73, -0.5]}    // Sortie arrière de la platine
-            mid={[0, 0.68, -1.14]}     // Tombe derrière le bord de la table
-            end={[0, 0, -1]}        // Finit au sol (caché derrière le meuble)
-            color="#888888"           // Gris
-            thickness={0.005}         // Deux fois plus fin que les autres
+            start={[0, 0.73, -0.5]}    
+            mid={[0, 0.68, -1.14]}     
+            end={[0, 0, -1]}        
+            color="#888888"           
+            thickness={0.005}         
         />
-
 
         {/* --- PLATINE VINYLE --- */}
-        {/* Posée sur la table. Ajuste le position-y (0.85) pour qu'elle touche le plateau */}
-        <group position={[0, 0.7, -0.4]}> 
-            
+       <group position={[0, 0.7, -0.4]}> 
             <Turntable 
                 scale={1} 
                 rotation={[0, -0.5, 0]}
                 isPlaying={activeProject !== null}
-                onClick={(e: any) => { 
-                    e.stopPropagation(); 
-                    setFocus(focus === 'turntable' ? 'intro' : 'turntable'); 
-                }}
+                onClick={(e: any) => handleToggle('turntable', e)} // <--- MODIFIÉ
                 onPointerOver={() => document.body.style.cursor = 'pointer'}
                 onPointerOut={() => document.body.style.cursor = 'auto'}
             />
-
-            {/* Le vinyle actif qui tourne */}
             {activeProject !== null && (<ActiveVinyl projectIndex={activeProject} />)}
         </group>
 
-{/* --- CARNET GLB (EXPÉRIENCES) --- */}
-<NotebookModel 
-    position={[0.8, 0.7, -0.2]} 
-    rotation={[0, 0.2, 0]}
-    scale={2} 
-    onClick={(e: any) => { 
-        e.stopPropagation(); 
-        setFocus('experience'); // C'est ça qui active le CameraManager
-        setActiveProject(null); 
-    }}
-    onPointerOver={() => document.body.style.cursor = 'pointer'}
-    onPointerOut={() => document.body.style.cursor = 'auto'}
-/>
-        {/* --- VINYLES FLOTTANTS (MENU) --- */}
+        {/* --- OMBRES DE CONTACT TABLE (Pour ancrer les objets) --- */}
+        <ContactShadows 
+            position={[0, 0.71, -0.5]} // Juste un poil au-dessus de la table (Y=0.7)
+            opacity={0.6}              // Assez visible
+            scale={5}                  // Taille de la zone d'ombre
+            blur={2}                   // Flou pour faire naturel
+            far={0.5}                  // Distance max de projection (pour ne pas toucher le sol)
+            resolution={512}           // Qualité
+            color="#1d1124"            // Violet très sombre (cohérent avec l'ambiance)
+        />
+
+        {/* --- CARNET GLB (EXPÉRIENCES) --- */}
+       {/* --- GROUPE CARNET (VISUEL + HITBOX) --- */}
+        {/* On place le groupe entier à la position voulue */}
+        <group position={[0.6, 0.7, -0.3]} rotation={[0, 0.2, 0]}>
+            
+            {/* 1. Le modèle visuel (Juste pour faire joli, on enlève le onClick ici) */}
+            <NotebookModel scale={2} />
+
+            {/* 2. LA HITBOX INVISIBLE (C'est elle qu'on clique !) */}
+            {/* Une boîte transparente légèrement plus grande que le carnet */}
+            <mesh 
+                position={[0, 0.05, 0]} // Un peu surélevée pour être sûr de la toucher
+                onClick={(e: any) => handleToggle('experience', e)}
+                onPointerOver={() => document.body.style.cursor = 'pointer'}
+                onPointerOut={() => document.body.style.cursor = 'auto'}
+                visible={false} // <--- REND LA BOÎTE INVISIBLE
+            >
+                {/* Taille de la zone de clic : Largeur, Hauteur, Profondeur */}
+                <boxGeometry args={[0.5, 0.2, 0.7]} /> 
+                <meshBasicMaterial color="red" wireframe />
+            </mesh>
+
+        </group>
+
+        <group>
+    {/* Tes autres objets existants (Table, etc.) */}
+    {/* <Table position={[0, 0, 0]} /> */}
+
+
+    {/* LE NOUVEAU PORTANT (RACK) */}
+    <Rack 
+        // POSITION : C'est ici qu'il faut régler !
+        // [X (gauche/droite), Y (hauteur), Z (avant/arrière)]
+        // Essai : à gauche (-3), au sol (0), un peu en arrière (-1.5)
+        position={[0, 0, 0]} 
+        
+        // SCALE : Si le modèle est trop gros ou trop petit
+        scale={10} 
+        
+        // ROTATION : [X, Y, Z] en radians. 
+        // Math.PI / 2 = tourner de 90 degrés sur l'axe Y (vertical)
+        rotation={[0, Math.PI / 4, 0]} 
+    />
+
+</group>
+
+        {/* --- VINYLES FLOTTANTS --- */}
         <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
             <group position={[0, 0.9, 0.4]}>
             {projects.map((project, index) => {
@@ -308,7 +382,7 @@ export const Experience = () => {
   );
 };
 
-// Pré-chargement des assets pour éviter le pop-in
+// Pré-chargement des assets
 useGLTF.preload("/models/turntable.glb");
 useGLTF.preload("/sofa.glb");
 useGLTF.preload("/acousticfoam.glb");

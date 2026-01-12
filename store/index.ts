@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 // On définit les 4 endroits où la caméra peut regarder
-export type FocusType = 'intro' | 'turntable' | 'poster' | 'record';
+export type FocusType = 'intro' | 'turntable' | 'poster' | 'record'| 'experience';
 
 interface State {
   focus: FocusType; // <--- On utilise "focus" maintenant

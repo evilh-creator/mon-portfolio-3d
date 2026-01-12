@@ -220,34 +220,63 @@ const navItemClass = (isActive: boolean) =>
             </div>
         </div>
       )}
+     {/* EXPÉRIENCE (STYLE SKILLS / TIMELINE) */}
       {focus === 'experience' && (
-  <div className="fixed top-0 right-0 h-full w-[500px] bg-black/80 backdrop-blur-xl p-12 overflow-y-auto z-40 border-l border-white/10 shadow-2xl">
-      <h2 className="text-5xl font-black text-white mb-12 mt-10">Expérience.</h2>
-      
-      {/* Liste des expériences (Statique ou via un fichier data) */}
-      <div className="flex flex-col gap-12">
-          {/* Item 1 */}
-          <div className="relative border-l-2 border-white/20 pl-8">
-              <span className="text-6xl font-bold text-white/10 absolute -left-6 -top-6">24</span>
-              <h3 className="text-2xl font-bold text-white mb-2">Art Director Assistant</h3>
-              <p className="text-xs font-mono text-white/50 uppercase tracking-widest mb-4">Agence XYZ • Paris</p>
-              <p className="text-gray-400 leading-relaxed">
-                  Création de contenus visuels, motion design pour campagnes social media, et assistance sur shootings photo.
-              </p>
-          </div>
+        <div className="experience-container">
+            <h2 className="experience-title">
+                Experience
+            </h2>
+            
+            <div className="flex flex-col">
+                
+                {/* ITEM 1: FREELANCE */}
+                <div className="experience-item">
+                    <div className="experience-year">2024 — Now</div>
+                    <div className="experience-content">
+                        <h3>360° Artist Manager & Art Director</h3>
+                        <span className="experience-context">Freelance • For @MEWA & @BVNBAN</span>
+                        <ul className="experience-desc list-disc pl-5 mt-2 space-y-1">
+                            <li><b>Career Management:</b> Full-stack management of the artists' careers and brand image.</li>
+                            <li><b>Music Marketing & PR:</b> Launch strategies, press relations, and editorial calendar.</li>
+                            <li><b>Art Direction & Production:</b> Visual identities (Covers), music video direction & editing.</li>
+                            <li><b>Distribution:</b> Digital distribution (Spotify, Apple Music, Deezer) via aggregators.</li>
+                        </ul>
+                    </div>
+                </div>
 
-          {/* Item 2 */}
-          <div className="relative border-l-2 border-white/20 pl-8">
-              <span className="text-6xl font-bold text-white/10 absolute -left-6 -top-6">23</span>
-              <h3 className="text-2xl font-bold text-white mb-2">Graphic Designer</h3>
-              <p className="text-xs font-mono text-white/50 uppercase tracking-widest mb-4">Freelance</p>
-              <p className="text-gray-400 leading-relaxed">
-                  Identités visuelles, UI Design pour startups et création de pochettes d'albums.
-              </p>
-          </div>
-      </div>
-  </div>
-)}
+                {/* ITEM 2: UN FESTIVALISTE */}
+                <div className="experience-item">
+                    <div className="experience-year">Internship 01/2025 — 02/2025</div>
+                    <div className="experience-content">
+                        <h3>Community Manager & Videographer</h3>
+                        <span className="experience-context">Un Festivaliste</span>
+                        <ul className="experience-desc list-disc pl-5 mt-2 space-y-1">
+                            <li><b>Content Creation:</b> Produced Reels and posts to promote YouTube content.</li>
+                            <li><b>Social Media:</b> Community management across all platforms.</li>
+                            <li><b>Design:</b> Created high-impact YouTube thumbnails.</li>
+                            <li><b>Strategy:</b> Implemented new creative concepts for the channel.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                {/* ITEM 3: NORMANIA */}
+                <div className="experience-item">
+                    <div className="experience-year">Internship 07/2024 - 08/2024</div>
+                    <div className="experience-content">
+                        <h3>Assistant Community Manager</h3>
+                        <span className="experience-context">Normania</span>
+                        <ul className="experience-desc list-disc pl-5 mt-2 space-y-1">
+                            <li><b>Marketing Strategy:</b> Launch strategy for a new artist.</li>
+                            <li><b>Graphic Design:</b> Posters for events/concerts and VHSS flyers.</li>
+                            <li><b>Cover Art:</b> Artwork for Lux Ornot - "Other Vices".</li>
+                            <li><b>Promotion:</b> Reels and posts for concert residency promotion.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+      )}
 
   {/* SKILLS (VERSION CSS CLEAN & GIANT) */}
       {focus === 'record' && (

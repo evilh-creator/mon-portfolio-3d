@@ -4,6 +4,7 @@ import { useStore } from "@/store";
 import { useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { easing } from "maath";
+import * as THREE from 'three';
 
 export const CameraManager = () => {
   const focus = useStore((state) => state.focus);
