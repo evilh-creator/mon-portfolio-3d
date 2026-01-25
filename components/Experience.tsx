@@ -1,26 +1,29 @@
 "use client";
 
+import { useMemo, useLayoutEffect, useState, useEffect, Suspense } from 'react';
+import * as THREE from 'three';
+import { OrbitControls, useGLTF, useTexture, Float, Environment, Preload } from "@react-three/drei"; 
+import { EffectComposer, Noise, Vignette, ChromaticAberration, Bloom } from '@react-three/postprocessing';
+
+// Components
 import { Turntable } from "./Turntable";
 import { Vinyl } from "./Vinyl";
 import { ActiveVinyl } from "./ActiveVinyl";
 import { GoldRecord } from "./GoldRecord";
-import { projects } from "@/data/projects";
-import { OrbitControls, useGLTF, useTexture, Float, Environment, Preload } from "@react-three/drei"; 
-import { CameraManager } from "./CameraManager";
-import { useStore, HoverItemType } from "@/store";
-import { useMemo, useLayoutEffect, Suspense } from 'react';
-import * as THREE from 'three';
 import { Rack } from "./Rack"; 
-
 import { Corkboard } from "./Corkboard";
 import { HoverLight } from "./HoverLight";
-import { EffectComposer, Noise, Vignette, ChromaticAberration, Bloom } from '@react-three/postprocessing';
 import { Wall } from "./Wall";
 import { LevitatingLogo } from "./LevitatingLogo";
 import { MusicManager } from "./MusicManager";
 import { Floor } from "./Floor";
+import { CameraManager } from "./CameraManager";
 
-// --- CONFIGURATION GLOBALE DES MODÈLES ---
+// Hooks & Data
+import { useStore, HoverItemType } from "@/store";
+import { projects } from "@/data/projects";
+
+// --- CONFIGURATION GLOBALE DES MODÈLES (Performance) ---
 function useModelSettings(scene: THREE.Group) {
   useLayoutEffect(() => {
     scene.traverse((child) => {
@@ -41,23 +44,7 @@ function CarpetModel(props: any) { const { scene } = useGLTF('/carpet.glb'); con
 function SpeakerModel(props: any) { const { scene } = useGLTF('/speaker.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
 function NotebookModel(props: any) { const { scene } = useGLTF('/notebook.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
 
-// --- NOUVEAU WRAPPER POUR LE SOL (Gère les ombres) ---
-function FloorModel(props: any) {
-  const { scene } = useGLTF('/sol.glb');
-  const clone = useMemo(() => scene.clone(), [scene]);
-
-  useLayoutEffect(() => {
-    clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        child.receiveShadow = true; // Le sol reçoit les ombres
-        child.castShadow = false;
-      }
-    });
-  }, [clone]);
-
-  return <primitive object={clone} {...props} />;
-}
-
+// --- CABLE ---
 function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: number[], mid: number[], end: number[], color?: string, thickness?: number }) {
   const curve = useMemo(() => {
     return new THREE.CatmullRomCurve3([new THREE.Vector3(...start), new THREE.Vector3(...mid), new THREE.Vector3(...end)]);
@@ -70,11 +57,45 @@ function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: n
   );
 }
 
+// =========================================================
+//                  MAIN COMPONENT
+// =========================================================
+
 export const Experience = (props: any) => {
   const { setFocus, focus, activeProject, setActiveProject, setHoveredItem } = useStore();
-  const floor = useGLTF('/sol.glb');
+  
+  // --- SYSTÈME RESPONSIVE COMPLET ---
+  // On gère l'échelle (scale) et la position Y (hauteur) en fonction de l'écran
+  const [responsiveConfig, setResponsiveConfig] = useState({ scale: 1, position: [0, -1, 0] });
 
-  // 1. CHARGEMENT DES TEXTURES
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      
+      if (width < 500) {
+        // MOBILE (Petit)
+        setResponsiveConfig({ scale: 0.55, position: [0, -0.2, 0] });
+      } else if (width < 850) {
+        // TABLETTE (Portrait) / GROS MOBILE
+        setResponsiveConfig({ scale: 0.7, position: [0, -0.5, 0] });
+      } else if (width < 1100) {
+        // LAPTOP / TABLETTE PAYSAGE
+        setResponsiveConfig({ scale: 0.85, position: [0, -0.8, 0] });
+      } else {
+        // DESKTOP (Grand écran)
+        setResponsiveConfig({ scale: 1, position: [0, -1, 0] });
+      }
+    };
+
+    // Calcul initial
+    handleResize();
+    
+    // Écoute les changements
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Textures
   const textures = useTexture({
     poster: "/textures/poster.jpg",
     banner: "/textures/LaHaine.jpg",
@@ -82,7 +103,8 @@ export const Experience = (props: any) => {
     small: "/textures/262754.jpg",
   });
 
-  const handleToggle = (target: 'intro' | 'poster' | 'turntable' | 'record' | 'experience' | 'rack'| 'board', e: any) => {
+  // --- INTERACTION ---
+  const handleToggle = (target: any, e: any) => {
     e.stopPropagation(); 
     setActiveProject(null);
     setHoveredItem(null); 
@@ -95,12 +117,10 @@ export const Experience = (props: any) => {
   
   return (
     <>
+      {/* On passe toujours le focus au CameraManager */}
       <CameraManager /> 
-
-    <MusicManager />
-    
+      <MusicManager />
       
-      {/* AMBIANCE DARK */}
       <color attach="background" args={['#020202']} />
       <fogExp2 attach="fog" args={['#020202', 0.035]} /> 
       <ambientLight intensity={0.02} color="#4a3b59" />
@@ -125,146 +145,115 @@ export const Experience = (props: any) => {
         <Bloom luminanceThreshold={0.2} mipmapBlur intensity={0.5} radius={0.4} />
       </EffectComposer>
 
-      <OrbitControls makeDefault enabled={focus === 'intro'} enableZoom={false} enablePan={false} minAzimuthAngle={-0.3} maxAzimuthAngle={0.3} minPolarAngle={Math.PI / 2.5} maxPolarAngle={Math.PI / 2 - 0.1} rotateSpeed={0.5} dampingFactor={0.9} enableRotate={false}/>
+      <OrbitControls 
+        makeDefault enabled={focus === 'intro'} enableZoom={false} enablePan={false} 
+        minAzimuthAngle={-0.3} maxAzimuthAngle={0.3} minPolarAngle={Math.PI / 2.5} maxPolarAngle={Math.PI / 2 - 0.1} 
+        rotateSpeed={0.5} dampingFactor={0.9} enableRotate={false}
+      />
 
       <Suspense fallback={null}>
-      <group position={[0, -1, 0]}>
         
-        {/* LE SOL (Modèle chargé) */}
-        
-        
-        <CarpetModel position={[0, 0.01, -0.5]} scale={3} />
-        
-        {/* MUR GLB */}
-        <Wall position={[0, 0, -2.9]} rotation={[0, Math.PI / 2, 0]} />
-        <Floor position={[-6.5, 0, 0]} scale={3} />
-
-
-        <SofaModel position={[3.5, 0, -1.5]} rotation={[0, -0.5, 0]} scale={1.5} />
-
-        {/* --- GROUPE DECO MURALE AVEC TEXTURES --- */}
-        <group position={[0, 0, -2.8]}> 
+        {/* GROUPE PRINCIPAL AVEC LOGIQUE RESPONSIVE AVANCÉE */}
+        <group position={responsiveConfig.position as any} scale={responsiveConfig.scale}>
             
-            {/* POSTER "MOI" (Gauche) */}
-             <mesh position={[-0.8, 2.5, 0]} onClick={(e) => handleToggle('poster', e)} onPointerOver={(e) => onOver('poster', e)} onPointerOut={onOut} castShadow={false} receiveShadow={true}>
-                <planeGeometry args={[1.5, 2]} />
-                <meshStandardMaterial map={textures.poster} roughness={0.5} />
-            </mesh>
+            <CarpetModel position={[0, 0.01, -0.5]} scale={3} />
+            <Wall position={[0, 0, -2.9]} rotation={[0, Math.PI / 2, 0]} />
+            <Floor position={[-6.5, 0, 0]} scale={3} />
+            <SofaModel position={[3.5, 0, -1.5]} rotation={[0, -0.5, 0]} scale={1.5} />
 
-            {/* MOUSSES ACOUSTIQUES */}
-            <group position={[-3, 2.5, 0]}>
-                <FoamModel position={[0, 0.3, 0]}   rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
-                <FoamModel position={[0, 0, 0]}     rotation={[Math.PI / 2, 0, 0]} scale={1} />
-                <FoamModel position={[0, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
-                <FoamModel position={[0.3, 0.3, 0]}   rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
-                <FoamModel position={[0.3, 0, 0]}     rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
-                <FoamModel position={[0.3, -0.3, 0]}  rotation={[Math.PI / 2, 0, 0]} scale={1} />
-                <FoamModel position={[0.6, 0.3, 0]}   rotation={[Math.PI / 2, 0, 0]} scale={1} />
-                <FoamModel position={[0.6, 0, 0]}     rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
-                <FoamModel position={[0.6, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
-            </group>
-            
-            {/* BANNIÈRE HAUTE (La Haine) */}
-            <mesh position={[1.2, 3.6, 0]} castShadow={false} receiveShadow={true}>
-                 <planeGeometry args={[1.2, 0.7]} />
-                 <meshStandardMaterial map={textures.banner} roughness={0.5} /> 
-            </mesh>
+            <group position={[0, 0, -2.8]}> 
+                <mesh position={[-0.8, 2.5, 0]} onClick={(e) => handleToggle('poster', e)} onPointerOver={(e) => onOver('poster', e)} onPointerOut={onOut} castShadow={false} receiveShadow={true}>
+                    <planeGeometry args={[1.5, 2]} />
+                    <meshStandardMaterial map={textures.poster} roughness={0.5} />
+                </mesh>
 
-            <group onClick={(e) => handleToggle('record', e)} onPointerOver={(e) => onOver('record', e)} onPointerOut={onOut}>
-                <GoldRecord position={[1.2, 2.5, 0]} scale={0.8} />
-            </group>
-
-            {/* PETIT POSTER 1 (Live Aid) */}
-            <mesh position={[0.7, 1.3, 0]} castShadow={false} receiveShadow={true}>
-                <planeGeometry args={[0.6, 0.8]} />
-                <meshStandardMaterial map={textures.liveAid} roughness={0.5} />
-            </mesh>
-            
-            {/* PETIT POSTER 2 (262754) */}
-            <mesh position={[1.7, 1.3, 0]} castShadow={false} receiveShadow={true}>
-                <planeGeometry args={[0.6, 0.8]} />
-                <meshStandardMaterial map={textures.small} roughness={0.5} />
-            </mesh>
-        </group>
-
-        <TableModel position={[0, -0.2, -0.5]} scale={1.2} />
-        <SpeakerModel position={[-1, 0.7, -0.6]} rotation={[0, 0.5, 0]} scale={3} />
-        <SpeakerModel position={[1, 0.7, -0.6]} rotation={[0, -0.5, 0]} scale={3} />
-
-        <Cable start={[-1.15, 0.9, -0.7]} mid={[-0.2, 0.71, -1]} end={[0.1, 0.75, -0.6]} />
-        <Cable start={[1.15, 0.9, -0.7]} mid={[0, 0.71, -1]} end={[0.1, 0.75, -0.6]} />
-        <Cable start={[0, 0.73, -0.5]} mid={[0, 0.68, -1.14]} end={[0, 0, -1]} color="#888888" thickness={0.005} />
-
-       <group 
-            position={[0, 0.7, -0.4]} 
-            
-            // L'événement est ICI, sur le groupe parent
-            onClick={(e) => {
-                e.stopPropagation(); 
+                <group position={[-3, 2.5, 0]}>
+                    <FoamModel position={[0, 0.3, 0]}   rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
+                    <FoamModel position={[0, 0, 0]}     rotation={[Math.PI / 2, 0, 0]} scale={1} />
+                    <FoamModel position={[0, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
+                    <FoamModel position={[0.3, 0.3, 0]}   rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
+                    <FoamModel position={[0.3, 0, 0]}     rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
+                    <FoamModel position={[0.3, -0.3, 0]}  rotation={[Math.PI / 2, 0, 0]} scale={1} />
+                    <FoamModel position={[0.6, 0.3, 0]}   rotation={[Math.PI / 2, 0, 0]} scale={1} />
+                    <FoamModel position={[0.6, 0, 0]}     rotation={[Math.PI / 2, Math.PI, 0]} scale={1} />
+                    <FoamModel position={[0.6, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
+                </group>
                 
-                // --- LA SÉCURITÉ ABSOLUE ---
-                // Si on est DÉJÀ en mode turntable, on interdit STRICTEMENT
-                // de relancer l'action. Le clic est tué ici.
-                
+                <mesh position={[1.2, 3.6, 0]} castShadow={false} receiveShadow={true}>
+                    <planeGeometry args={[1.2, 0.7]} />
+                    <meshStandardMaterial map={textures.banner} roughness={0.5} /> 
+                </mesh>
 
-                // Sinon, on active le mode
-                handleToggle('turntable', e);
-            }}
-            
-            onPointerOver={(e) => onOver('turntable', e)}
-            onPointerOut={onOut}
-        > 
-            {/* On retire les onClick de la Turntable pour éviter les conflits */}
-            <Turntable 
-                scale={1} 
-                rotation={[0, -0.5, 0]} 
-                isPlaying={activeProject !== null}
-                // PLUS DE ONCLICK ICI
-            />
-            
-            {/* Le Vinyle est protégé par le groupe parent */}
-            {activeProject !== null && (<ActiveVinyl projectIndex={activeProject} />)}
-        </group>
+                <group onClick={(e) => handleToggle('record', e)} onPointerOver={(e) => onOver('record', e)} onPointerOut={onOut}>
+                    <GoldRecord position={[1.2, 2.5, 0]} scale={0.8} />
+                </group>
 
-        <group position={[0.6, 0.7, -0.3]} rotation={[0, 0.2, 0]} onClick={(e) => handleToggle('experience', e)} onPointerOver={(e) => onOver('experience', e)} onPointerOut={onOut}>
-            <NotebookModel scale={2} />
-            <mesh position={[0, 0.05, 0]} visible={false}>
-                <boxGeometry args={[0.5, 0.2, 0.7]} /> 
-                <meshBasicMaterial color="red" wireframe />
-            </mesh>
-            <LevitatingLogo position={[-1.4, 0.2, 0]} rotation={[0, 0.5, 0]} scale={0.2}/>
-                     // Ajuste la taille si le sol est tout petit
-      
-        </group>
-
-        <group position={[-2.4, 0, -1.5]} rotation={[0, Math.PI / 4, 0]} onClick={(e) => handleToggle('rack', e)} onPointerOver={(e) => onOver('rack', e)} onPointerOut={onOut}>
-            <Rack scale={1.3} />
-            <mesh position={[0, 1, 0]} visible={false}>
-                <boxGeometry args={[1, 2, 1]} />
-                <meshBasicMaterial color="red" wireframe />
-            </mesh>
-        </group>
-
-        <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
-            <group position={[0, 0.9, 0.4]}>
-            {projects.map((project, index) => {
-                if (activeProject === index) return null;
-                return (
-                <Vinyl 
-                    key={project.id} image={project.image} index={index}
-                    scale={0.15} position={[(index - 1) * 0.5, 0, 0]} rotation-x={-0.2}
-                    onPointerEnter={() => {}}
-onClick={(e: any) => { e.stopPropagation(); setActiveProject(index); setFocus('turntable'); }}                />
-                );
-            })}
+                <mesh position={[0.7, 1.3, 0]} castShadow={false} receiveShadow={true}>
+                    <planeGeometry args={[0.6, 0.8]} />
+                    <meshStandardMaterial map={textures.liveAid} roughness={0.5} />
+                </mesh>
+                <mesh position={[1.7, 1.3, 0]} castShadow={false} receiveShadow={true}>
+                    <planeGeometry args={[0.6, 0.8]} />
+                    <meshStandardMaterial map={textures.small} roughness={0.5} />
+                </mesh>
             </group>
-        </Float>
 
-        <group position={[3, 2.5, -2.95]} rotation={[0, 0, 0]} onClick={(e) => handleToggle('board', e)} onPointerOver={(e) => onOver('board', e)} onPointerOut={onOut}>
-            <Corkboard scale={0.8} />
+            <TableModel position={[0, -0.2, -0.5]} scale={1.2} />
+            <SpeakerModel position={[-1, 0.7, -0.6]} rotation={[0, 0.5, 0]} scale={3} />
+            <SpeakerModel position={[1, 0.7, -0.6]} rotation={[0, -0.5, 0]} scale={3} />
+
+            <Cable start={[-1.15, 0.9, -0.7]} mid={[-0.2, 0.71, -1]} end={[0.1, 0.75, -0.6]} />
+            <Cable start={[1.15, 0.9, -0.7]} mid={[0, 0.71, -1]} end={[0.1, 0.75, -0.6]} />
+            <Cable start={[0, 0.73, -0.5]} mid={[0, 0.68, -1.14]} end={[0, 0, -1]} color="#888888" thickness={0.005} />
+
+            <group 
+                position={[0, 0.7, -0.4]} 
+                onClick={(e) => { e.stopPropagation(); handleToggle('turntable', e); }}
+                onPointerOver={(e) => onOver('turntable', e)}
+                onPointerOut={onOut}
+            > 
+                <Turntable scale={1} rotation={[0, -0.5, 0]} isPlaying={activeProject !== null} />
+                {activeProject !== null && (<ActiveVinyl projectIndex={activeProject} />)}
+            </group>
+
+            <group position={[0.6, 0.7, -0.3]} rotation={[0, 0.2, 0]} onClick={(e) => handleToggle('experience', e)} onPointerOver={(e) => onOver('experience', e)} onPointerOut={onOut}>
+                <NotebookModel scale={2} />
+                <mesh position={[0, 0.05, 0]} visible={false}>
+                    <boxGeometry args={[0.5, 0.2, 0.7]} /> 
+                    <meshBasicMaterial color="red" wireframe />
+                </mesh>
+                <LevitatingLogo position={[-1.4, 0.2, 0]} rotation={[0, 0.5, 0]} scale={0.2}/>
+            </group>
+
+            <group position={[-2.4, 0, -1.5]} rotation={[0, Math.PI / 4, 0]} onClick={(e) => handleToggle('rack', e)} onPointerOver={(e) => onOver('rack', e)} onPointerOut={onOut}>
+                <Rack scale={1.3} />
+                <mesh position={[0, 1, 0]} visible={false}>
+                    <boxGeometry args={[1, 2, 1]} />
+                    <meshBasicMaterial color="red" wireframe />
+                </mesh>
+            </group>
+
+            <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
+                <group position={[0, 0.9, 0.4]}>
+                {projects.map((project, index) => {
+                    if (activeProject === index) return null;
+                    return (
+                        <Vinyl 
+                            key={project.id} image={project.image} index={index}
+                            scale={0.15} position={[(index - 1) * 0.5, 0, 0]} rotation-x={-0.2}
+                            onPointerEnter={() => {}}
+                            onClick={(e: any) => { e.stopPropagation(); setActiveProject(index); setFocus('turntable'); }}                
+                        />
+                    );
+                })}
+                </group>
+            </Float>
+
+            <group position={[3, 2.5, -2.95]} rotation={[0, 0, 0]} onClick={(e) => handleToggle('board', e)} onPointerOver={(e) => onOver('board', e)} onPointerOut={onOut}>
+                <Corkboard scale={0.8} />
+            </group>
+            
         </group>
-        
-      </group>
       </Suspense>
       <Preload all />
     </>
@@ -278,4 +267,4 @@ useGLTF.preload("/table.glb");
 useGLTF.preload("/carpet.glb");
 useGLTF.preload("/speaker.glb");
 useGLTF.preload("/notebook.glb");
-useGLTF.preload("/sol.glb"); // Ajout du sol au preload
+useGLTF.preload("/sol.glb");

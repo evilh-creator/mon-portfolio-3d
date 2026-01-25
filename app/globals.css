@@ -352,3 +352,42 @@ html, body, #root {
   transform: scale(1.05);
   color: #ffffff !important; /* Petite touche orange au survol */
 }
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 850px) {
+  
+  /* Titre Principal plus petit */
+  .title-main {
+    font-size: 3rem !important; /* Force la taille */
+    line-height: 1;
+    width: 90%;
+    left: 5%;
+    top: 10%;
+  }
+
+  /* Navigation ou overlay plus discrets */
+  .nav-button {
+    padding: 10px 15px;
+    font-size: 0.8rem;
+  }
+
+  /* La visionneuse de projets en bas */
+  .gallery-viewer {
+    width: 90%;
+    right: 5%;
+    bottom: 80px; /* On remonte pour ne pas être caché par la barre du navigateur */
+    flex-direction: column; /* Image au dessus du texte sur mobile */
+  }
+  
+  .gallery-image {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+  }
+
+  .tech-info-overlay {
+    position: relative;
+    width: 100%;
+    background: rgba(0,0,0,0.8);
+  }
+}
