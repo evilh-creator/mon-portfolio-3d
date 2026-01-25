@@ -64,13 +64,13 @@ export const Vinyl = (props: any) => {
         {/* Macaron Recto */}
         <mesh position={[0, 0.011, 0]} rotation-x={-Math.PI / 2}>
           <circleGeometry args={[0.35, 32]} />
-          <meshBasicMaterial map={texture} />
+          <meshBasicMaterial map={texture as any} />
         </mesh>
         
         {/* Macaron Verso */}
         <mesh position={[0, -0.011, 0]} rotation-x={Math.PI / 2}>
           <circleGeometry args={[0.35, 32]} />
-          <meshBasicMaterial map={texture} />
+          <meshBasicMaterial map={texture as any} />
         </mesh>
 
       </group>
