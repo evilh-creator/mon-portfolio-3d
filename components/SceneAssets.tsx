@@ -3,10 +3,10 @@
 
 import React from 'react';
 import { useGLTF } from '@react-three/drei';
-import { GroupProps } from '@react-three/fiber';
+
 
 // --- COMPOSANT TABLE ---
-export function TableModel(props: GroupProps) {
+export function TableModel(props: any) {
   // On charge le fichier
   const { scene } = useGLTF('/table.glb');
   // On retourne la scène 3D brute dans un groupe pour pouvoir la positionner
@@ -14,13 +14,13 @@ export function TableModel(props: GroupProps) {
 }
 
 // --- COMPOSANT SOFA ---
-export function SofaModel(props: GroupProps) {
+export function SofaModel(props: any) {
   const { scene } = useGLTF('/sofa.glb');
   return <primitive object={scene} {...props} />;
 }
 
 // --- COMPOSANT MOUSSE ACOUSTIQUE ---
-export function AcousticFoamModel(props: GroupProps) {
+export function AcousticFoamModel(props: any) {
   const { scene } = useGLTF('/acousticfoam.glb');
   return <primitive object={scene} {...props} />;
 }

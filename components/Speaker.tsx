@@ -1,8 +1,8 @@
 "use client";
 
-import { GroupProps } from "@react-three/fiber";
 
-export const Speaker = (props: GroupProps) => {
+
+export const Speaker = (props: any) => {
   return (
     <group {...props}>
       {/* LA BOÎTE (Caisson) */}
