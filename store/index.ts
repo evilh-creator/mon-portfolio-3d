@@ -1,11 +1,14 @@
 import { create } from 'zustand';
 
-// Ajout du type pour les items survolables
+// 👇 AJOUTE CE BLOC QUI MANQUE :
+export type FocusType = 'intro' |'rack' | 'turntable' | 'board' | null;
+
+// (Tu as sûrement déjà HoverItemType ici, laisse-le)
 export type HoverItemType = 'rack' | 'turntable' | 'poster' | 'board' | 'experience' | 'record' | null;
 
 interface State {
   // ... tes états existants ...
-  focus: FocusType;
+  focus: FocusType; // Maintenant, il sait ce que c'est !
   activeProject: number | null;
   isMuted: boolean;
 
