@@ -22,6 +22,7 @@ export default function Home() {
        <Canvas 
           // 1. QUALITÉ : On remet la netteté pour les écrans HD/Retina
           dpr={[1, 1.5]} 
+          performance={{ min: 0.5 }}
           
           shadows={false}
           

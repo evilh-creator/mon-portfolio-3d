@@ -2,7 +2,7 @@
 
 import { useMemo, useLayoutEffect, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
-import { OrbitControls, useGLTF, useTexture, Float, Environment, Preload } from "@react-three/drei"; 
+import { OrbitControls, useGLTF, useTexture, Float, Environment, Preload, PerformanceMonitor } from "@react-three/drei"; 
 import { EffectComposer, Noise, Vignette, ChromaticAberration, Bloom } from '@react-three/postprocessing';
 
 // Components
@@ -22,15 +22,15 @@ import { CameraManager } from "./CameraManager";
 // Hooks & Data
 import { useStore, HoverItemType } from "@/store";
 import { projects } from "@/data/projects";
-import { useMobile } from "@/hooks/useMobile"; // 👈 Hook Mobile
+import { useMobile } from "@/hooks/useMobile";
 
-// --- CONFIGURATION GLOBALE DES MODÈLES (Performance) ---
+// --- OPTIMISATION GLOBALE ---
 function useModelSettings(scene: THREE.Group) {
   useLayoutEffect(() => {
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         child.frustumCulled = false;
-        child.castShadow = false;
+        child.castShadow = false; // On désactive les ombres par modèle par défaut
         child.receiveShadow = false;
       }
     });
@@ -45,7 +45,6 @@ function CarpetModel(props: any) { const { scene } = useGLTF('/carpet.glb'); con
 function SpeakerModel(props: any) { const { scene } = useGLTF('/speaker.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
 function NotebookModel(props: any) { const { scene } = useGLTF('/notebook.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
 
-// --- CABLE ---
 function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: number[], mid: number[], end: number[], color?: string, thickness?: number }) {
   const curve = useMemo(() => {
     return new THREE.CatmullRomCurve3([new THREE.Vector3(...start), new THREE.Vector3(...mid), new THREE.Vector3(...end)]);
@@ -58,36 +57,31 @@ function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: n
   );
 }
 
-// =========================================================
-//                  MAIN COMPONENT
-// =========================================================
-
 export const Experience = (props: any) => {
   const { setFocus, focus, activeProject, setActiveProject, setHoveredItem } = useStore();
-  const isMobile = useMobile(); // 👈 On détecte le mobile
+  const isMobile = useMobile();
 
-  // --- SYSTÈME RESPONSIVE ---
+  // --- ÉTAT DE PERFORMANCE ---
+  // Par défaut, on tente la haute qualité (true).
+  // Si le PC rame, PerformanceMonitor passera ça à false.
+  const [highQuality, setHighQuality] = useState(true);
+
+  // --- RESPONSIVE ---
   const [responsiveConfig, setResponsiveConfig] = useState({ scale: 1, position: [0, -1, 0] });
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width < 500) {
-        setResponsiveConfig({ scale: 0.55, position: [0, -0.2, 0] });
-      } else if (width < 850) {
-        setResponsiveConfig({ scale: 0.7, position: [0, -0.5, 0] });
-      } else if (width < 1100) {
-        setResponsiveConfig({ scale: 0.85, position: [0, -0.8, 0] });
-      } else {
-        setResponsiveConfig({ scale: 1, position: [0, -1, 0] });
-      }
+      if (width < 500) setResponsiveConfig({ scale: 0.55, position: [0, -0.2, 0] });
+      else if (width < 850) setResponsiveConfig({ scale: 0.7, position: [0, -0.5, 0] });
+      else if (width < 1100) setResponsiveConfig({ scale: 0.85, position: [0, -0.8, 0] });
+      else setResponsiveConfig({ scale: 1, position: [0, -1, 0] });
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Textures
   const textures = useTexture({
     poster: "/textures/poster.jpg",
     banner: "/textures/LaHaine.jpg",
@@ -95,7 +89,6 @@ export const Experience = (props: any) => {
     small: "/textures/262754.jpg",
   });
 
-  // Callbacks
   const handleToggle = (target: any, e: any) => {
     e.stopPropagation(); 
     setActiveProject(null);
@@ -107,8 +100,18 @@ export const Experience = (props: any) => {
   const onOver = (item: HoverItemType, e: any) => { e.stopPropagation(); setHoveredItem(item); document.body.style.cursor = 'pointer'; };
   const onOut = (e: any) => { e.stopPropagation(); setHoveredItem(null); document.body.style.cursor = 'auto'; };
   
+  // On définit si on active les effets lourds (Ombres + Bloom)
+  // IL faut que : 1. Ce ne soit PAS un mobile ET 2. Que le PC tienne la route (highQuality)
+  const enableHeavyEffects = !isMobile && highQuality;
+
   return (
     <>
+      {/* MONITEUR DE PERFORMANCE : 
+         Si les FPS chutent, on appelle onDecline -> setHighQuality(false)
+         Cela va instantanément couper le Bloom et les Ombres pour sauver la fluidité.
+      */}
+      <PerformanceMonitor onDecline={() => setHighQuality(false)} />
+
       <CameraManager /> 
       <MusicManager />
       
@@ -116,14 +119,14 @@ export const Experience = (props: any) => {
       <fogExp2 attach="fog" args={['#020202', 0.035]} /> 
       <ambientLight intensity={0.02} color="#4a3b59" />
       
-      {/* Désactive la lumière de survol sur mobile pour économiser du GPU */}
-      {!isMobile && <HoverLight />}
+      {/* Lumière interactive seulement si on a la puissance nécessaire */}
+      {enableHeavyEffects && <HoverLight />}
 
       <spotLight 
         position={[7, 5, 5]} intensity={200} color="#ff9545" 
         angle={0.6} penumbra={0.5} 
-        // 👇 CRUCIAL : Pas d'ombres dynamiques sur mobile (très lourd)
-        castShadow={!isMobile}
+        // 👇 Les ombres ne s'activent que si le PC est puissant
+        castShadow={enableHeavyEffects}
         shadow-mapSize-width={512} shadow-mapSize-height={512} shadow-bias={-0.0001}
       />
 
@@ -132,9 +135,8 @@ export const Experience = (props: any) => {
       
       <Environment preset="city" environmentIntensity={0.1} />
 
-      {/* 👇 CRUCIAL : LE POST-PROCESSING EST DÉSACTIVÉ SUR MOBILE 
-          C'est ça qui fait crasher l'iPhone à 90% des cas */}
-      {!isMobile && (
+      {/* 👇 POST-PROCESSING : Coupé automatiquement si ça lag */}
+      {enableHeavyEffects && (
         <EffectComposer multisampling={0}>
             <Noise opacity={0.15} /> 
             <Vignette eskil={false} offset={0.1} darkness={1.1} />
@@ -150,7 +152,6 @@ export const Experience = (props: any) => {
       />
 
       <Suspense fallback={null}>
-        
         <group position={responsiveConfig.position as any} scale={responsiveConfig.scale}>
             
             <CarpetModel position={[0, 0.01, -0.5]} scale={3} />
@@ -159,7 +160,7 @@ export const Experience = (props: any) => {
             <SofaModel position={[3.5, 0, -1.5]} rotation={[0, -0.5, 0]} scale={1.5} />
 
             <group position={[0, 0, -2.8]}> 
-                <mesh position={[-0.8, 2.5, 0]} onClick={(e) => handleToggle('poster', e)} onPointerOver={(e) => onOver('poster', e)} onPointerOut={onOut} castShadow={false} receiveShadow={!isMobile}>
+                <mesh position={[-0.8, 2.5, 0]} onClick={(e) => handleToggle('poster', e)} onPointerOver={(e) => onOver('poster', e)} onPointerOut={onOut} castShadow={false} receiveShadow={enableHeavyEffects}>
                     <planeGeometry args={[1.5, 2]} />
                     <meshStandardMaterial map={textures.poster} roughness={0.5} />
                 </mesh>
@@ -176,7 +177,7 @@ export const Experience = (props: any) => {
                     <FoamModel position={[0.6, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
                 </group>
                 
-                <mesh position={[1.2, 3.6, 0]} castShadow={false} receiveShadow={!isMobile}>
+                <mesh position={[1.2, 3.6, 0]} castShadow={false} receiveShadow={enableHeavyEffects}>
                     <planeGeometry args={[1.2, 0.7]} />
                     <meshStandardMaterial map={textures.banner} roughness={0.5} /> 
                 </mesh>
@@ -185,11 +186,11 @@ export const Experience = (props: any) => {
                     <GoldRecord position={[1.2, 2.5, 0]} scale={0.8} />
                 </group>
 
-                <mesh position={[0.7, 1.3, 0]} castShadow={false} receiveShadow={!isMobile}>
+                <mesh position={[0.7, 1.3, 0]} castShadow={false} receiveShadow={enableHeavyEffects}>
                     <planeGeometry args={[0.6, 0.8]} />
                     <meshStandardMaterial map={textures.liveAid} roughness={0.5} />
                 </mesh>
-                <mesh position={[1.7, 1.3, 0]} castShadow={false} receiveShadow={!isMobile}>
+                <mesh position={[1.7, 1.3, 0]} castShadow={false} receiveShadow={enableHeavyEffects}>
                     <planeGeometry args={[0.6, 0.8]} />
                     <meshStandardMaterial map={textures.small} roughness={0.5} />
                 </mesh>
@@ -203,12 +204,7 @@ export const Experience = (props: any) => {
             <Cable start={[1.15, 0.9, -0.7]} mid={[0, 0.71, -1]} end={[0.1, 0.75, -0.6]} />
             <Cable start={[0, 0.73, -0.5]} mid={[0, 0.68, -1.14]} end={[0, 0, -1]} color="#888888" thickness={0.005} />
 
-            <group 
-                position={[0, 0.7, -0.4]} 
-                onClick={(e) => { e.stopPropagation(); handleToggle('turntable', e); }}
-                onPointerOver={(e) => onOver('turntable', e)}
-                onPointerOut={onOut}
-            > 
+            <group position={[0, 0.7, -0.4]} onClick={(e) => { e.stopPropagation(); handleToggle('turntable', e); }} onPointerOver={(e) => onOver('turntable', e)} onPointerOut={onOut}> 
                 <Turntable scale={1} rotation={[0, -0.5, 0]} isPlaying={activeProject !== null} />
                 {activeProject !== null && (<ActiveVinyl projectIndex={activeProject} />)}
             </group>
