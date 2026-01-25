@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 // 👇 AJOUTE CE BLOC QUI MANQUE :
-export type FocusType = 'intro' |'rack' | 'turntable' | 'board' | null;
+export type FocusType = 'intro' |'rack' | 'turntable' | 'board' | 'poster' | null;
 
 // (Tu as sûrement déjà HoverItemType ici, laisse-le)
 export type HoverItemType = 'rack' | 'turntable' | 'poster' | 'board' | 'experience' | 'record' | null;
