@@ -4,15 +4,15 @@ export const projects = [
     title: "Iamnotawast e",
     description: "As Project Lead for this comprehensive ad campaign, I aimed to redefine the perception of waste. I orchestrated the strategic action plan, co-created the Art Direction, and directed the commercial spot. This project stands as a testament to my versatility in digital creation, managing everything from team workflow to social media content production.",
     // J'ai pris la première image comme couverture
-    image: "/textures/iam1.png", 
-    screenshot: "/textures/iam1.png",
+    image: "/textures/iam1.jpg", 
+    screenshot: "/textures/iam1.jpg",
     audio: "/music/madef.mp3",
     gallery: [
-      "/textures/iam1.png",
-      "/textures/iam2.png",
-      "/textures/iam3.png",
-      "/textures/iam4.png",
-      "/textures/iam5.png"
+      "/textures/iam1.jpg",
+      "/textures/iam2.jpg",
+      "/textures/iam3.jpg",
+      "/textures/iam4.jpg",
+      "/textures/iam5.jpg"
     ],
     link: "https://youtu.be/FBV9_VhgMOA",
     github: "https://github.com",
@@ -27,11 +27,11 @@ export const projects = [
     // Attention aux majuscules (.JPG) que j'ai respectées d'après ta capture
     gallery: [
       "/textures/her1.jpg",
-      "/textures/her2.JPG",
-      "/textures/her3.JPG",
-      "/textures/her4.JPG",
+      "/textures/her2.jpg",
+      "/textures/her3.jpg",
+      "/textures/her4.jpg",
       "/textures/her5.jpg",
-      "/textures/her6.JPG"
+      "/textures/her6.jpg"
     ],
     link: "https://youtu.be/EZRdlDu8mhc",
     github: "https://github.com",
