@@ -44,15 +44,13 @@ export default function Home() {
           
           <Experience />
 
-          <EffectComposer multisampling={0} disableNormalPass={true}>
-            <Bloom 
-                luminanceThreshold={0.2} 
-                luminanceSmoothing={0.9} 
-                height={300} 
-                intensity={0.5} 
-            />
-            <Noise opacity={0.025} />
-          </EffectComposer>
+         <EffectComposer multisampling={0}> 
+  <Bloom 
+      luminanceThreshold={0.2} 
+      luminanceSmoothing={0.9} 
+      height={300} 
+  />
+</EffectComposer>
 
         </Canvas>
       </div>
