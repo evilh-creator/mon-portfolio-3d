@@ -52,7 +52,7 @@ function Polaroid({ item, activeId, setActiveId }: any) {
     >
       {/* CADRE BLANC */}
       <boxGeometry args={[0.6, 0.75, 0.01]} />
-      <meshStandardMaterial color="#f0f0f0" roughness={0.5} />
+      <meshStandardMaterial  color="#f0f0f0" roughness={0.5} />
 
       {/* --- L'IMAGE (TEXTURE) --- */}
       {/* CORRECTION : Position Z augmentée à 0.01 pour bien capter la lumière devant le cadre */}
@@ -60,7 +60,7 @@ function Polaroid({ item, activeId, setActiveId }: any) {
         <planeGeometry args={[0.5, 0.5]} />
         {/* CORRECTION : Settings pour aspect "Papier Glacé" */}
         <meshStandardMaterial 
-            map={texture} 
+            map={texture as any} 
             color="#ffffff" // Force le blanc pour que l'image soit pure
             roughness={0.2} // 0.2 = Brillant (capte bien le spot)
             metalness={0.1} // Petite touche métallique pour les reflets
