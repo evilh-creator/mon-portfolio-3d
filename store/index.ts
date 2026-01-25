@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 // Ajout du type pour les items survolables
-export type HoverItemType = 'rack' | 'turntable' | 'poster' | 'board' | 'experience' | null;
+export type HoverItemType = 'rack' | 'turntable' | 'poster' | 'board' | 'experience' | 'record' | null;
 
 interface State {
   // ... tes états existants ...
