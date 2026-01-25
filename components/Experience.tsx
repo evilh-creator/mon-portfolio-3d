@@ -22,6 +22,7 @@ import { CameraManager } from "./CameraManager";
 // Hooks & Data
 import { useStore, HoverItemType } from "@/store";
 import { projects } from "@/data/projects";
+import { useMobile } from "@/hooks/useMobile"; // 👈 Hook Mobile
 
 // --- CONFIGURATION GLOBALE DES MODÈLES (Performance) ---
 function useModelSettings(scene: THREE.Group) {
@@ -36,7 +37,7 @@ function useModelSettings(scene: THREE.Group) {
   }, [scene]);
 }
 
-// --- MODÈLES (Wrappers) ---
+// --- MODÈLES ---
 function SofaModel(props: any) { const { scene } = useGLTF('/sofa.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
 function FoamModel(props: any) { const { scene } = useGLTF('/acousticfoam.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
 function TableModel(props: any) { const { scene } = useGLTF('/table.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
@@ -63,34 +64,25 @@ function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: n
 
 export const Experience = (props: any) => {
   const { setFocus, focus, activeProject, setActiveProject, setHoveredItem } = useStore();
-  
-  // --- SYSTÈME RESPONSIVE COMPLET ---
-  // On gère l'échelle (scale) et la position Y (hauteur) en fonction de l'écran
+  const isMobile = useMobile(); // 👈 On détecte le mobile
+
+  // --- SYSTÈME RESPONSIVE ---
   const [responsiveConfig, setResponsiveConfig] = useState({ scale: 1, position: [0, -1, 0] });
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      
       if (width < 500) {
-        // MOBILE (Petit)
         setResponsiveConfig({ scale: 0.55, position: [0, -0.2, 0] });
       } else if (width < 850) {
-        // TABLETTE (Portrait) / GROS MOBILE
         setResponsiveConfig({ scale: 0.7, position: [0, -0.5, 0] });
       } else if (width < 1100) {
-        // LAPTOP / TABLETTE PAYSAGE
         setResponsiveConfig({ scale: 0.85, position: [0, -0.8, 0] });
       } else {
-        // DESKTOP (Grand écran)
         setResponsiveConfig({ scale: 1, position: [0, -1, 0] });
       }
     };
-
-    // Calcul initial
     handleResize();
-    
-    // Écoute les changements
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -103,7 +95,7 @@ export const Experience = (props: any) => {
     small: "/textures/262754.jpg",
   });
 
-  // --- INTERACTION ---
+  // Callbacks
   const handleToggle = (target: any, e: any) => {
     e.stopPropagation(); 
     setActiveProject(null);
@@ -117,7 +109,6 @@ export const Experience = (props: any) => {
   
   return (
     <>
-      {/* On passe toujours le focus au CameraManager */}
       <CameraManager /> 
       <MusicManager />
       
@@ -125,11 +116,14 @@ export const Experience = (props: any) => {
       <fogExp2 attach="fog" args={['#020202', 0.035]} /> 
       <ambientLight intensity={0.02} color="#4a3b59" />
       
-      <HoverLight />
+      {/* Désactive la lumière de survol sur mobile pour économiser du GPU */}
+      {!isMobile && <HoverLight />}
 
       <spotLight 
         position={[7, 5, 5]} intensity={200} color="#ff9545" 
-        angle={0.6} penumbra={0.5} castShadow={true}
+        angle={0.6} penumbra={0.5} 
+        // 👇 CRUCIAL : Pas d'ombres dynamiques sur mobile (très lourd)
+        castShadow={!isMobile}
         shadow-mapSize-width={512} shadow-mapSize-height={512} shadow-bias={-0.0001}
       />
 
@@ -138,12 +132,16 @@ export const Experience = (props: any) => {
       
       <Environment preset="city" environmentIntensity={0.1} />
 
-      <EffectComposer multisampling={0}>
-        <Noise opacity={0.15} /> 
-        <Vignette eskil={false} offset={0.1} darkness={1.1} />
-        <ChromaticAberration offset={new THREE.Vector2(0.002, 0.002)} radialModulation={false} modulationOffset={0} />
-        <Bloom luminanceThreshold={0.2} mipmapBlur intensity={0.5} radius={0.4} />
-      </EffectComposer>
+      {/* 👇 CRUCIAL : LE POST-PROCESSING EST DÉSACTIVÉ SUR MOBILE 
+          C'est ça qui fait crasher l'iPhone à 90% des cas */}
+      {!isMobile && (
+        <EffectComposer multisampling={0}>
+            <Noise opacity={0.15} /> 
+            <Vignette eskil={false} offset={0.1} darkness={1.1} />
+            <ChromaticAberration offset={new THREE.Vector2(0.002, 0.002)} radialModulation={false} modulationOffset={0} />
+            <Bloom luminanceThreshold={0.2} mipmapBlur intensity={0.5} radius={0.4} />
+        </EffectComposer>
+      )}
 
       <OrbitControls 
         makeDefault enabled={focus === 'intro'} enableZoom={false} enablePan={false} 
@@ -153,7 +151,6 @@ export const Experience = (props: any) => {
 
       <Suspense fallback={null}>
         
-        {/* GROUPE PRINCIPAL AVEC LOGIQUE RESPONSIVE AVANCÉE */}
         <group position={responsiveConfig.position as any} scale={responsiveConfig.scale}>
             
             <CarpetModel position={[0, 0.01, -0.5]} scale={3} />
@@ -162,7 +159,7 @@ export const Experience = (props: any) => {
             <SofaModel position={[3.5, 0, -1.5]} rotation={[0, -0.5, 0]} scale={1.5} />
 
             <group position={[0, 0, -2.8]}> 
-                <mesh position={[-0.8, 2.5, 0]} onClick={(e) => handleToggle('poster', e)} onPointerOver={(e) => onOver('poster', e)} onPointerOut={onOut} castShadow={false} receiveShadow={true}>
+                <mesh position={[-0.8, 2.5, 0]} onClick={(e) => handleToggle('poster', e)} onPointerOver={(e) => onOver('poster', e)} onPointerOut={onOut} castShadow={false} receiveShadow={!isMobile}>
                     <planeGeometry args={[1.5, 2]} />
                     <meshStandardMaterial map={textures.poster} roughness={0.5} />
                 </mesh>
@@ -179,7 +176,7 @@ export const Experience = (props: any) => {
                     <FoamModel position={[0.6, -0.3, 0]}  rotation={[Math.PI / 2, -Math.PI / 2, 0]} scale={1} />
                 </group>
                 
-                <mesh position={[1.2, 3.6, 0]} castShadow={false} receiveShadow={true}>
+                <mesh position={[1.2, 3.6, 0]} castShadow={false} receiveShadow={!isMobile}>
                     <planeGeometry args={[1.2, 0.7]} />
                     <meshStandardMaterial map={textures.banner} roughness={0.5} /> 
                 </mesh>
@@ -188,11 +185,11 @@ export const Experience = (props: any) => {
                     <GoldRecord position={[1.2, 2.5, 0]} scale={0.8} />
                 </group>
 
-                <mesh position={[0.7, 1.3, 0]} castShadow={false} receiveShadow={true}>
+                <mesh position={[0.7, 1.3, 0]} castShadow={false} receiveShadow={!isMobile}>
                     <planeGeometry args={[0.6, 0.8]} />
                     <meshStandardMaterial map={textures.liveAid} roughness={0.5} />
                 </mesh>
-                <mesh position={[1.7, 1.3, 0]} castShadow={false} receiveShadow={true}>
+                <mesh position={[1.7, 1.3, 0]} castShadow={false} receiveShadow={!isMobile}>
                     <planeGeometry args={[0.6, 0.8]} />
                     <meshStandardMaterial map={textures.small} roughness={0.5} />
                 </mesh>
