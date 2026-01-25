@@ -1,8 +1,7 @@
 "use client";
 
-import { GroupProps } from "@react-three/fiber";
 
-export const AcousticPanel = (props: GroupProps) => {
+export const AcousticPanel = (props: any) => {
   return (
     <mesh {...props}>
       {/* Un carré de 50cm x 50cm */}
