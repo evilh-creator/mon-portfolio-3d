@@ -118,9 +118,10 @@ export const Experience = (props: any) => {
       <color attach="background" args={['#020202']} />
       <fogExp2 attach="fog" args={['#020202', 0.035]} /> 
       <ambientLight intensity={0.02} color="#4a3b59" />
+      {!isMobile && <HoverLight />}
       
       {/* Lumière interactive seulement si on a la puissance nécessaire */}
-      {enableHeavyEffects && <HoverLight />}
+     
 
       <spotLight 
         position={[7, 5, 5]} intensity={200} color="#ff9545" 

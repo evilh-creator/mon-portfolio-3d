@@ -44,27 +44,27 @@ function Polaroid({ item, activeId, setActiveId }: any) {
       position={[item.x, item.y, 0.05]}
       rotation={[0, 0, item.rot]}
       
-      // --- CORRECTION DU CLIC ---
+      // --- CLIC : On garde stopPropagation ici pour la logique de Zoom ---
       onClick={(e) => {
         e.stopPropagation(); 
 
         if (focus !== 'board') {
-            // 1. Si on est loin, on zoome d'abord
             setFocus('board');
         } else {
-            // 2. Si on est déjà sur le board...
             if (isActive) {
-                // ...et que c'est ouvert : ON FERME !
                 setActiveId(null);
             } else {
-                // ...et que c'est fermé : ON OUVRE !
                 setActiveId(item.id);
             }
         }
       }}
 
+      // --- SURVOL : C'est ici la correction ---
       onPointerOver={(e) => {
-        e.stopPropagation();
+        // ❌ J'ai SUPPRIMÉ e.stopPropagation()
+        // Maintenant, l'événement "monte" jusqu'au groupe parent (Corkboard)
+        // Et le Corkboard pourra dire au système "Allume la lumière Board !"
+        
         document.body.style.cursor = 'pointer';
       }}
       
@@ -123,7 +123,7 @@ function Polaroid({ item, activeId, setActiveId }: any) {
         </Html>
       )}
 
-      {/* CLIC EXTERIEUR (Fond invisible) pour fermer si on clique à côté */}
+      {/* CLIC EXTERIEUR */}
       {isActive && (
          <mesh position={[0, 0, -0.1]} scale={[10, 10, 1]} onClick={(e) => { e.stopPropagation(); setActiveId(null); }}>
              <planeGeometry args={[10, 10]} />

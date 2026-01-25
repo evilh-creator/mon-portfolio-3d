@@ -1,16 +1,16 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useStore } from "@/store";
 import * as THREE from "three";
-import { useRef, useState, useLayoutEffect } from "react";
+import { useRef, useLayoutEffect } from "react";
 
-// CONFIGURATION DES POSITIONS (Lumière + Cible)
+// --- CONFIGURATION ---
 const TARGETS: Record<string, { position: [number, number, number], target: [number, number, number] }> = {
     rack: {
         position: [-1.5, 3, 2], 
         target: [-1.5, 0.5, 0.5] 
     },
     turntable: {
-        position: [2, 2, 1], // Un peu plus bas pour bien éclairer le plateau
+        position: [2, 2, 1],
         target: [0.7, 0.8, -0.5] 
     },
     poster: {
@@ -31,38 +31,49 @@ const TARGETS: Record<string, { position: [number, number, number], target: [num
     }
 };
 
-// --- COMPOSANT : UNE SEULE LUMIÈRE INDIVIDUELLE ---
-// Elle gère sa propre cible et son propre fondu (fade)
-const IndividualSpot = ({ config, isActive }: { config: any, isActive: boolean }) => {
+// --- COMPOSANT SPOT INDIVIDUEL ---
+const IndividualSpot = ({ name, config }: { name: string, config: any }) => {
     const spotLightRef = useRef<THREE.SpotLight>(null);
     const targetRef = useRef<THREE.Object3D>(new THREE.Object3D());
     const { scene } = useThree();
 
-    // 1. On ajoute la cible invisible dans la scène (obligatoire pour que spotLight.target fonctionne)
+    // 1. Initialisation (Une seule fois)
     useLayoutEffect(() => {
         // Positionner la cible
         targetRef.current.position.set(...(config.target as [number, number, number]));
         scene.add(targetRef.current);
         
-        // Lier la lumière à la cible
+        // Positionner la lumière
         if (spotLightRef.current) {
             spotLightRef.current.target = targetRef.current;
-            // On positionne la lumière
             spotLightRef.current.position.set(...(config.position as [number, number, number]));
         }
 
         return () => { scene.remove(targetRef.current); };
     }, [scene, config]);
 
-    // 2. Animation d'intensité (Fade In / Fade Out)
+    // 2. Animation (60 FPS - Lecture directe du Store)
     useFrame((state, delta) => {
         if (!spotLightRef.current) return;
+
+        // 👇 LA MAGIE EST ICI : On lit le store en direct sans re-render React
+        const { hoveredItem, focus } = useStore.getState();
         
-        // Si actif, on vise 50 d'intensité (c'est fort car on est dans le noir). Sinon 0.
-        const targetIntensity = isActive ? 50 : 0;
-        
-        // Vitesse du fondu (plus le chiffre est haut, plus c'est rapide)
-        // 6 = assez rapide et réactif
+        let shouldBeOn = false;
+
+        // Logique de priorité :
+        if (hoveredItem) {
+            // Si on survole un objet, c'est lui qui s'allume
+            shouldBeOn = (hoveredItem === name);
+        } else {
+            // Sinon, si on est zoomé sur une section (et pas intro), on l'éclaire
+            if (focus !== 'intro') {
+                shouldBeOn = (focus === name);
+            }
+        }
+
+        // Animation de l'intensité
+        const targetIntensity = shouldBeOn ? 80 : 0; // J'ai monté un peu à 80 pour être sûr que ça se voit
         const speed = 6 * delta; 
 
         spotLightRef.current.intensity = THREE.MathUtils.lerp(
@@ -76,40 +87,28 @@ const IndividualSpot = ({ config, isActive }: { config: any, isActive: boolean }
         <spotLight
             ref={spotLightRef}
             castShadow
-            intensity={0} // Commence éteint
-            angle={0.6}   // Cône un peu large
-            penumbra={0.5} // Bords doux
+            intensity={0}
+            angle={0.6}
+            penumbra={0.5}
             distance={10}
-            color="#ffebd6" // Lumière un peu chaude
+            color="#ffebd6"
             shadow-bias={-0.0001}
         />
     );
 };
 
-// --- COMPOSANT PRINCIPAL : LE GESTIONNAIRE ---
+// --- COMPOSANT PRINCIPAL ---
 export const HoverLight = () => {
-    // On récupère l'état séparément (Performance)
-    const hoveredItem = useStore((state) => state.hoveredItem);
-    const focus = useStore((state) => state.focus);
-
-    // DÉTERMINER QUI EST ACTIF
-    let activeKey: string | null = null;
-
-    if (hoveredItem) {
-        // Priorité absolue au survol de la souris
-        activeKey = hoveredItem;
-    } else if (focus !== 'intro') {
-        // Si pas de souris, on regarde le zoom caméra
-        activeKey = focus;
-    }
-
+    // Note : On n'appelle PLUS useStore ici pour éviter de tout recharger à chaque mouvement.
+    // Chaque spot gère son état tout seul comme un grand.
+    
     return (
         <>
             {Object.entries(TARGETS).map(([key, config]) => (
                 <IndividualSpot 
                     key={key} 
+                    name={key}
                     config={config} 
-                    isActive={key === activeKey} 
                 />
             ))}
         </>

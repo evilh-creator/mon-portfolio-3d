@@ -108,19 +108,39 @@ export const Overlay = () => {
       </div>
 
       {/* 3. HEADER (RETOUR / SON) */}
+      {/* 3. HEADER (RETOUR / SON) */}
       <div className="fixed top-0 w-full p-8 flex justify-between items-start z-50 pointer-events-none">
+        
+        {/* BOUTON RETOUR */}
         <div className="pointer-events-auto mt-2">
             {focus !== 'intro' ? (
-            <button onClick={() => { setFocus('intro'); setActiveProject(null); }} className="group flex items-center gap-3 px-5 py-2.5 bg-transparent border-none !text-white transition-all duration-300 opacity-80 hover:opacity-100 hover:scale-105" style={{ color: 'white' }}>
+            <button 
+                onClick={() => { setFocus('intro'); setActiveProject(null); }} 
+                // J'ai enlevé 'opacity-80' pour avoir un blanc pur direct
+                // J'ai augmenté le padding (px-6 py-3) et la taille du texte (text-xs comme le menu)
+                className="group flex items-center gap-4 px-6 py-3 bg-transparent border-none !text-white transition-all duration-300 hover:scale-105" 
+                style={{ color: 'white' }}
+            >
                 <span className="text-xl">←</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest">Retour</span>
+                {/* Passage de text-[10px] à text-xs + tracking-[0.2em] */}
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">Retour</span>
             </button>
             ) : <div />}
         </div>
-        <button onClick={toggleMute} className="pointer-events-auto mt-2 bg-transparent border-none flex items-center gap-3 px-5 py-2.5 !text-white transition-all duration-300 opacity-80 hover:opacity-100 hover:scale-105" style={{ color: 'white' }}>
-          <span className="text-[10px] font-bold uppercase tracking-widest">{isMuted ? 'Sound Off' : 'Sound On'}</span>
-          <span className={`inline-block w-1.5 h-1.5 rounded-full ${isMuted ? 'bg-red-500' : 'bg-green-400 animate-pulse'}`}></span>
+
+        {/* BOUTON SOUND */}
+        <button 
+            onClick={toggleMute} 
+            className="pointer-events-auto mt-2 bg-transparent border-none flex items-center gap-4 px-6 py-3 !text-white transition-all duration-300 hover:scale-105" 
+            style={{ color: 'white' }}
+        >
+          {/* Passage de text-[10px] à text-xs + tracking-[0.2em] */}
+          <span className="text-xs font-bold uppercase tracking-[0.2em]">
+            {isMuted ? 'Sound Off' : 'Sound On'}
+          </span>
+          <span className={`inline-block w-2 h-2 rounded-full ${isMuted ? 'bg-red-500' : 'bg-green-400 animate-pulse'}`}></span>
         </button>
+
       </div>
 
       
