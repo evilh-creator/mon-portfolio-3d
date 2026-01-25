@@ -22,7 +22,7 @@ export const Vinyl = ({ image, index, ...props }: VinylProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   if (!audioRef.current && typeof window !== "undefined") {
-      audioRef.current = new Audio("/sounds/hover.mp3");
+      audioRef.current = new Audio("/music/madef.mp3");
       audioRef.current.volume = 0.2;
   }
 

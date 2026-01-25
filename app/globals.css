@@ -3,428 +3,352 @@
 @tailwind utilities;
 
 /* =========================================
-   RÉGLAGES GÉNÉRAUX & MENU
+   RÉGLAGES GÉNÉRAUX
    ========================================= */
+:root {
+  --background: #020202;
+  --foreground: #ededed;
+}
+
 html, body, #root {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Important pour éviter les scrollbars doubles */
-  background-color: #111;
+  overflow: hidden;
+  background-color: var(--background);
   color: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-
-
-/* Positionnement du menu */
+/* =========================================
+   MENU NAVIGATION (HAUT)
+   ========================================= */
 .menu-position {
   position: fixed;
-  top: 30px;
+  top: 2rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 50;
+  display: flex;
+  gap: 20px;
 }
 
-/* Style des boutons (texte blanc forcé) */
-.menu-btn {
+/* =========================================
+   BOUTON CONTACT (BAS DROITE - CORRECTIF)
+   ========================================= */
+.contact-container {
+  position: fixed;
+  bottom: 3rem; 
+  right: 3rem;  
+  z-index: 9999; /* Très haut pour passer au-dessus de tout */
+  pointer-events: auto !important; /* Force le bouton à être cliquable */
+}
+
+.contact-link {
   color: white !important;
-  background: transparent;
-  margin: 0 20px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  transition: all 0.3s ease;
-}
-
-.menu-btn:hover {
-  transform: scale(1.05);
-}
-
-.menu-btn-active {
-  transform: scale(1.1);
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
-}
-
-/* =========================================
-   SECTION MOI (POSTER)
-   ========================================= */
-.poster-container {
-  position: fixed;
-  top: 50%;
-  left: 5%;
-  transform: translateY(-50%);
-  
-  /* RÈGLE DES 30% */
-  width: 30vw;
-  min-width: 450px;
-  max-height: 85vh;
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(24px);
-  padding: 3rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  pointer-events: auto;
-  z-index: 30;
-}
-.poster-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-
-.poster-title {
-  font-size: 5rem;
-  font-weight: 900;
-  color: white;
-  line-height: 0.8;
-  letter-spacing: -0.05em;
-  margin-bottom: 1.5rem;
-  word-wrap: break-word;
-}
-
-.poster-separator {
-  width: 6rem;
-  height: 0.5rem;
-  background-color: white;
-  margin-bottom: 2rem;
-}
-
-.poster-identity {
-  font-size: 2.5rem;
-  font-weight: 300;
-  line-height: 1.1;
-  color: #f3f4f6;
-  margin-bottom: 1.5rem;
-}
-
-.poster-bio {
-  font-size: 1.1rem;
-  font-weight: 300;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 2rem;
-}
-
-.poster-quote-box {
-  padding: 1.5rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 0.75rem;
-  border-left: 4px solid white;
-  margin-bottom: 1.5rem;
-}
-
-.poster-quote-text {
-  font-size: 1.2rem;
-  font-style: italic;
-  font-weight: 500;
-  color: white;
-  line-height: 1.4;
-}
-
-.poster-footer {
+  text-decoration: none !important;
   font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3em;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
-  padding-top: 1rem;
-}
-
-/* =========================================
-   SECTION SKILLS
-   ========================================= */
-.skills-container {
-  position: fixed;
-  top: 50%;
-  left: 5%;
-  transform: translateY(-50%);
-
-  /* RÈGLE DES 30% */
-  width: 30vw;
-  min-width: 450px;
-  max-height: 85vh;
-  overflow-y: auto;
-  scrollbar-width: none;
-
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
-  padding: 2.5rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  pointer-events: auto;
-  z-index: 30;
-  text-align: left;
-}
-.skills-container::-webkit-scrollbar { display: none; }
-
-.skills-title {
-  font-size: 4rem;
-  font-weight: 900;
-  color: white;
-  line-height: 0.8;
-  letter-spacing: -0.05em;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid rgba(255,255,255,0.2);
-  padding-bottom: 1rem;
-  display: inline-block;
-}
-
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-.skills-box {
-  display: flex;
-  flex-direction: column;
-}
-
-.skills-category {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.8rem;
-}
-
-.skills-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.skills-list li {
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-  line-height: 1.4;
-  margin-bottom: 0.3rem;
-}
-
-/* =========================================
-   SECTION EXPÉRIENCE (MISE À JOUR)
-   ========================================= */
-.experience-container {
-  position: fixed;
-  top: 55%;
-  left: 5%;
-  transform: translateY(-50%);
-  
-  /* RÈGLE DES 30% */
-  width: 30vw;
-  min-width: 450px;
-  max-height: 75vh;
-  overflow-y: auto;
-  scrollbar-width: none;
-  
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(24px);
-  padding: 2.5rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  pointer-events: auto;
-  z-index: 30;
-  text-align: left;
-}
-.experience-container::-webkit-scrollbar { display: none; }
-
-.experience-title {
-  font-size: 4rem;
-  font-weight: 900;
-  color: white;
-  line-height: 0.9;
-  letter-spacing: -0.05em;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid white;
-  padding-bottom: 1rem;
-  display: inline-block;
-}
-
-.experience-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 2.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 2rem;
-}
-
-.experience-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.experience-year {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 5px 10px;
-  border-radius: 4px;
-  display: inline-block;
-  width: fit-content;
-  margin-bottom: 0.5rem;
-}
-
-.experience-content h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 0.2rem 0;
-  line-height: 1.2;
-}
-
-.experience-context {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 1rem;
+  letter-spacing: 0.2em;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   display: block;
 }
 
-/* Styles pour les listes (bullet points) */
-.experience-desc {
-  margin: 0;
-  padding-left: 1.2rem;
-}
-
-.experience-desc li {
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.5;
-  margin-bottom: 0.4rem;
-  list-style-type: disc;
-}
-
-.experience-desc li b, 
-.experience-desc li strong {
-  color: white;
-  font-weight: 600;
+.contact-link:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
 }
 
 /* =========================================
-   SIDEBAR PROJETS (DROITE)
+   CONTENEURS TEXTE (GAUCHE)
    ========================================= */
-.project-sidebar {
+/* Utilise cette classe pour Poster, Skills, Experience, Projets, Rack */
+.poster-container, 
+.skills-container, 
+.experience-container,
+.project-container,
+.rack-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  /* Largeur fixe et étroite (25%) */
+  width: 25vw; 
+  min-width: 350px;
+  
+  padding: 0 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  
+  z-index: 20;
+  pointer-events: auto; /* Permet de cliquer sur les liens */
+  
+  /* Fond vitré */
+  background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================
+   TYPOGRAPHIE
+   ========================================= */
+.poster-title, 
+.skills-title, 
+.experience-title,
+.rack-title,
+.project-title {
+  font-size: 3.5rem; /* Ajusté pour éviter d'être trop énorme */
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: white;
+  margin-bottom: 2rem;
+}
+
+.project-desc, 
+.poster-bio, 
+.experience-desc {
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 300;
+}
+
+.project-meta {
+  font-family: monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* =========================================
+   GALERIE IMAGE (DROITE)
+   ========================================= */
+.gallery-viewer {
   position: fixed;
   top: 0;
   right: 0;
   height: 100vh;
-  width: 500px;
-  background: rgba(10, 10, 10, 0.95);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  overflow-y: auto;
-  pointer-events: auto;
-  z-index: 20;
-  box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-}
-
-.sidebar-content {
-  padding: 2rem;
-  margin-top: 8rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.sidebar-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 1rem;
-}
-
-.sidebar-title {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.75rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
-.sidebar-image-container {
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: border-color 0.3s;
-}
-.sidebar-image-container:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.sidebar-img {
-  width: 100%;
-  height: auto;
-  opacity: 0.8;
-  transition: opacity 0.5s;
-}
-.sidebar-image-container:hover .sidebar-img {
-  opacity: 1;
-}
-
-.sidebar-caption {
-  margin-top: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 0.25rem;
-}
-
-.sidebar-caption-text {
-  font-size: 0.6rem;
-  font-family: monospace;
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.sidebar-footer {
-  height: 6rem;
+  width: 75vw; /* Occupe le reste de l'écran */
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 2rem;
+  pointer-events: none; /* Laisse passer les clics autour */
+  padding-right: 2rem;
+}
+
+/* --- LE CADRE RECTANGLE (CORRIGÉ) --- */
+.gallery-rect-wrapper {
+  position: relative;
+  pointer-events: auto !important; /* Force le clic à l'intérieur */
+  
+  /* TAILLE FIXE LIMITÉE */
+  width: 100%;
+  max-width: 500px;      /* <-- Limite la largeur (taille carte postale) */
+  aspect-ratio: 16 / 9;  /* <-- Force le format rectangle */
+  
+  /* BORDS GRIS (Background) */
+  background-color: #1f1f1f; /* <-- Couleur des bandes si l'image ne remplit pas */
+  
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 50;
+}
+
+/* L'IMAGE (Visible en entier) */
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  
+  /* CONTAIN = On voit toute l'image, les vides montrent le background gris */
+  object-fit: contain; 
+  
+  display: block;
+  opacity: 0;
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* --- FLÈCHES DE NAVIGATION --- */
+.gallery-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  background: rgba(0, 0, 0, 0.7); 
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  /* INDISPENSABLE POUR CLIQUER */
+  z-index: 100; 
+  pointer-events: auto !important; 
+  
+  opacity: 1; 
+}
+
+.gallery-nav-btn:hover {
+  background: white;
+  color: black;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-prev { left: 1rem; }
+.gallery-next { right: 1rem; }
+
+.gallery-counter {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.5rem;
+  font-family: monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* --- TEXTE SUR IMAGE (POUR LE RACK) --- */
+.tech-info-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  color: white;
+  z-index: 25;
+}
+
+.tech-title {
+  font-size: 2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.tech-desc {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #ffffff;
 }
 
 /* =========================================
-   MEDIA QUERIES (MOBILE & TABLETTE)
+   SCROLLBAR (CUSTOM)
    ========================================= */
-@media (max-width: 1024px) {
-  /* Pour MOI, SKILLS et EXPERIENCE */
-  .poster-container,
-  .skills-container,
-  .experience-container {
-    width: 90vw; /* Prend presque tout l'écran sur mobile */
-    min-width: auto;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Centré parfaitement */
-    padding: 1.5rem;
-  }
-
-  /* Ajustements de taille de police */
-  .poster-title { font-size: 3.5rem; }
-  .poster-identity { font-size: 2rem; }
-  
-  .skills-title { font-size: 3rem; }
-  .skills-grid { grid-template-columns: 1fr 1fr; }
-
-  .experience-title { font-size: 2.5rem; }
-  .experience-content h3 { font-size: 1.3rem; }
-  
-  /* Sidebar Projet : On peut vouloir la cacher ou la mettre en bas sur mobile,
-     mais par défaut je la laisse intacte ou tu peux ajouter :
-     .project-sidebar { display: none; } si tu veux la cacher sur mobile.
-  */
+.custom-scrollbar {
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.4) rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 480px) {
-  /* Ajustements ultra-mobile */
-  .skills-grid { grid-template-columns: 1fr; }
-  .poster-title { font-size: 2.8rem; }
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  display: block;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+/* =========================================
+   MEDIA QUERIES
+   ========================================= */
+@media (max-width: 1024px) {
+  .poster-container,
+  .skills-container,
+  .experience-container,
+  .project-container,
+  .rack-container {
+    width: 100%;
+    padding: 2rem;
+    background: rgba(0,0,0,0.9);
+  }
+  
+  .gallery-viewer {
+    display: none; /* On cache la galerie sur mobile pour simplifier, ou on la passe en dessous */
+  }
+}
+/* DANS globals.css */
+
+/* DANS globals.css */
+
+/* --- NAVIGATION BASSE (PROJETS) --- */
+.project-nav-bottom {
+  position: fixed;
+  bottom: 3rem !important; /* <--- LE POINT CLÉ : Force le bas de page */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  
+  z-index: 200; /* Au-dessus de tout */
+  pointer-events: auto !important;
+  
+  /* DESIGN : Style "Glass" plus visible */
+ /* Gris foncé presque opaque */
+  padding: 12px 30px;
+  border-radius: 50px;
+ /* Bordure blanche visible */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.nav-btn-text {
+  background: none;
+  border: none;
+  
+  /* TEXTE BLANC FORCÉ */
+  color: white !important; 
+  
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-btn-text:hover {
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  transform: scale(1.05);
+  color: #ffffff !important; /* Petite touche orange au survol */
 }

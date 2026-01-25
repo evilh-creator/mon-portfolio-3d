@@ -26,8 +26,8 @@ export const LoadingScreen = () => {
         
         {/* TITRE MIS À JOUR */}
         <h1 className="text-white text-sm md:text-base font-bold uppercase tracking-[0.2em] mb-4 text-center leading-relaxed">
-          Vous entrez dans la chambre de <br/>
-          <span className="text-gray-300">Raphaël Liberge</span>
+          Raphaël Liberge's <br/>
+          <span className="text-gray-300">Portfolio</span>
         </h1>
 
         {/* BARRE */}

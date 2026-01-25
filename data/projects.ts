@@ -1,42 +1,55 @@
 export const projects = [
   {
     id: 1,
-    title: "Projet Alpha",
-    description: "Une plateforme e-commerce bâtie avec Next.js et Stripe.",
-    image: "/textures/cover1.jpg", 
-    screenshot: "/textures/cover1.jpg",
-    // AJOUT DE LA GALERIE (Mets tes vraies images ici)
+    title: "Iamnotawast e",
+    description: "As Project Lead for this comprehensive ad campaign, I aimed to redefine the perception of waste. I orchestrated the strategic action plan, co-created the Art Direction, and directed the commercial spot. This project stands as a testament to my versatility in digital creation, managing everything from team workflow to social media content production.",
+    // J'ai pris la première image comme couverture
+    image: "/textures/iam1.png", 
+    screenshot: "/textures/iam1.png",
+    audio: "/music/madef.mp3",
     gallery: [
-      "/textures/cover1.jpg",
-      "/textures/poster.jpg", // J'utilise des images qu'on sait qui marchent pour le test
-      "/textures/cover1.jpg"
+      "/textures/iam1.png",
+      "/textures/iam2.png",
+      "/textures/iam3.png",
+      "/textures/iam4.png",
+      "/textures/iam5.png"
     ],
-    link: "https://google.com",
+    link: "https://youtu.be/FBV9_VhgMOA",
     github: "https://github.com",
   },
   {
     id: 2,
-    title: "App Musique",
-    description: "Clone de Spotify avec l'API Web Playback.",
-    image: "/textures/cover2.jpg",
-    screenshot: "/textures/cover2.jpg",
+    title: "Herói Do Mar",
+    description: "Acting as First Assistant Director during my academic exchange at ESMAD in Porto, I managed a film crew within an international environment. Bridging language barriers, I handled logistical planning (call sheets, equipment), location scouting, and on-set team coordination. A pivotal first step into professional cinema production.",
+    image: "/textures/her1.jpg",
+    screenshot: "/textures/her1.jpg",
+     audio: "/music/fado.mp3",
+    // Attention aux majuscules (.JPG) que j'ai respectées d'après ta capture
     gallery: [
-      "/textures/cover2.jpg",
-      "/textures/poster.jpg"
+      "/textures/her1.jpg",
+      "/textures/her2.JPG",
+      "/textures/her3.JPG",
+      "/textures/her4.JPG",
+      "/textures/her5.jpg",
+      "/textures/her6.JPG"
     ],
-    link: "https://google.com",
+    link: "https://youtu.be/EZRdlDu8mhc",
     github: "https://github.com",
   },
   {
     id: 3,
-    title: "Portfolio v1",
-    description: "Mon ancien portfolio en HTML/CSS pur.",
-    image: "/textures/cover3.jpg",
-    screenshot: "/textures/cover3.jpg",
+    title: "Flint Agency",
+    description: "As the General Manager of a 17-person fictional communication agency, I oversaw the entire operational scope. My responsibilities ranged from financial forecasting and resource allocation to client relations and final quality control. This immersive simulation significantly matured my leadership style and understanding of agency dynamics.",
+    image: "/textures/flint1.jpg",
+    screenshot: "/textures/flint1.jpg",
+     audio: "/music/montaigne.mp3",
     gallery: [
-      "/textures/cover3.jpg"
+      "/textures/flint1.jpg",
+      "/textures/flint2.jpg",
+      "/textures/flint3.jpg",
+      "/textures/flint4.jpg"
     ],
-    link: "https://google.com",
+    link: "https://youtu.be/8eL1rjWvS2Q",
     github: "https://github.com",
   },
 ];
