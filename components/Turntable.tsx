@@ -1,14 +1,18 @@
+/* DANS src/components/Turntable.tsx */
 "use client";
 
 import { useGLTF } from "@react-three/drei";
-import { useFrame, GroupProps } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber"; // ❌ On a retiré GroupProps d'ici
 import { MathUtils } from "three";
 
-interface TurntableProps extends GroupProps {
-  isPlaying: boolean;
-}
+// ❌ Plus besoin d'interface compliquée
+// interface TurntableProps ... (Supprimé)
 
-export const Turntable = ({ isPlaying, ...props }: TurntableProps) => {
+// ✅ On accepte "props: any" pour que scale, rotation, onClick passent sans erreur
+export const Turntable = (props: any) => {
+  // On sépare "isPlaying" (pour la logique) du reste des props (pour le groupe)
+  const { isPlaying, ...rest } = props;
+
   // On charge le modèle
   const { scene, nodes } = useGLTF("/models/turntable.glb") as any;
 
@@ -36,9 +40,7 @@ export const Turntable = ({ isPlaying, ...props }: TurntableProps) => {
       // Si la distance est grande (> 0.1), on lève le bras.
       // Si on est presque arrivé (ou au repos), on le baisse (0).
       
-      // ⚠️ RÈGLE CETTE VALEUR : 
-      // Si le bras rentre DANS le plateau, change 0.2 en -0.2
-      const HAUTEUR_LEVEE = -0.2; 
+      const HAUTEUR_LEVEE = -0.2; // Ajuste si nécessaire
       
       const targetRotationX = distanceRestante > 0.1 ? HAUTEUR_LEVEE : -0.1;
 
@@ -52,7 +54,8 @@ export const Turntable = ({ isPlaying, ...props }: TurntableProps) => {
   });
 
   return (
-    <group {...props}>
+    // ✅ C'est ici que "...rest" applique le scale={1} et rotation={...} venant du parent
+    <group {...rest}>
       <primitive object={scene} />
     </group>
   );
