@@ -11,7 +11,7 @@ import { useStore, HoverItemType } from "@/store";
 import { useMemo, useLayoutEffect, Suspense } from 'react';
 import * as THREE from 'three';
 import { Rack } from "./Rack"; 
-import { GroupProps } from "@react-three/fiber";
+
 import { Corkboard } from "./Corkboard";
 import { HoverLight } from "./HoverLight";
 import { EffectComposer, Noise, Vignette, ChromaticAberration, Bloom } from '@react-three/postprocessing';
@@ -34,15 +34,15 @@ function useModelSettings(scene: THREE.Group) {
 }
 
 // --- MODÈLES (Wrappers) ---
-function SofaModel(props: GroupProps) { const { scene } = useGLTF('/sofa.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
-function FoamModel(props: GroupProps) { const { scene } = useGLTF('/acousticfoam.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
-function TableModel(props: GroupProps) { const { scene } = useGLTF('/table.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
-function CarpetModel(props: GroupProps) { const { scene } = useGLTF('/carpet.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
-function SpeakerModel(props: GroupProps) { const { scene } = useGLTF('/speaker.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
-function NotebookModel(props: GroupProps) { const { scene } = useGLTF('/notebook.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
+function SofaModel(props: any) { const { scene } = useGLTF('/sofa.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
+function FoamModel(props: any) { const { scene } = useGLTF('/acousticfoam.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
+function TableModel(props: any) { const { scene } = useGLTF('/table.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
+function CarpetModel(props: any) { const { scene } = useGLTF('/carpet.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
+function SpeakerModel(props: any) { const { scene } = useGLTF('/speaker.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
+function NotebookModel(props: any) { const { scene } = useGLTF('/notebook.glb'); const clone = useMemo(() => scene.clone(), [scene]); useModelSettings(clone); return <primitive object={clone} {...props} />; }
 
 // --- NOUVEAU WRAPPER POUR LE SOL (Gère les ombres) ---
-function FloorModel(props: GroupProps) {
+function FloorModel(props: any) {
   const { scene } = useGLTF('/sol.glb');
   const clone = useMemo(() => scene.clone(), [scene]);
 
@@ -70,7 +70,7 @@ function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: n
   );
 }
 
-export const Experience = () => {
+export const Experience = (props: any) => {
   const { setFocus, focus, activeProject, setActiveProject, setHoveredItem } = useStore();
   const floor = useGLTF('/sol.glb');
 
