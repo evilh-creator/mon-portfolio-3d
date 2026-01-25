@@ -2,23 +2,21 @@
 
 import { useTexture } from "@react-three/drei";
 import { useState, useRef } from "react";
-import { GroupProps } from "@react-three/fiber";
-import { useStore } from "@/store"; // Pour vérifier si le son est coupé
+// ❌ ON A SUPPRIMÉ L'IMPORT DE GroupProps QUI FAISAIT PLANTER
+import { useStore } from "@/store"; 
 
-interface VinylProps extends GroupProps {
-  image: string;
-  index: number;
-}
+// ✅ On passe en "any" pour accepter toutes les props (scale, position, etc.) sans erreur
+export const Vinyl = (props: any) => {
+  // On extrait les variables spécifiques, et on garde le reste dans "...rest"
+  const { image, index, ...rest } = props;
 
-export const Vinyl = ({ image, index, ...props }: VinylProps) => {
   const texture = useTexture(image);
   const [hovered, setHover] = useState(false);
   
   // Récupération de l'état Mute
   const isMuted = useStore((state) => state.isMuted);
   
-  // Création du son (chargé une seule fois)
-  // Assure-toi d'avoir le fichier public/sounds/hover.mp3
+  // Création du son
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   if (!audioRef.current && typeof window !== "undefined") {
@@ -29,7 +27,6 @@ export const Vinyl = ({ image, index, ...props }: VinylProps) => {
   const playHoverSound = () => {
     if (isMuted || !audioRef.current) return;
     
-    // Clone pour permettre des lectures rapides successives
     const sound = audioRef.current.cloneNode() as HTMLAudioElement;
     sound.volume = 0.2; 
     sound.play().catch(() => {});
@@ -37,12 +34,14 @@ export const Vinyl = ({ image, index, ...props }: VinylProps) => {
 
   return (
     <group 
-      {...props} 
+      {...rest} // 👈 C'est ici que le scale et la position du parent sont appliqués
       onPointerOver={(e) => {
         e.stopPropagation();
         setHover(true);
         document.body.style.cursor = 'pointer';
-        playHoverSound(); // <--- BING !
+        playHoverSound();
+        // On appelle la fonction du parent si elle existe
+        if (props.onPointerOver) props.onPointerOver(e);
         if (props.onPointerEnter) props.onPointerEnter(e);
       }}
       onPointerOut={(e) => {
@@ -50,6 +49,8 @@ export const Vinyl = ({ image, index, ...props }: VinylProps) => {
         document.body.style.cursor = 'auto';
         if (props.onPointerOut) props.onPointerOut(e);
       }}
+      // On s'assure que le clic passe aussi
+      onClick={props.onClick}
     >
       {/* Animation légère au survol (Sort du rang) */}
       <group position-x={hovered ? 0.2 : 0}> 
