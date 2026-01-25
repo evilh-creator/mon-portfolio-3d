@@ -1,53 +1,72 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useStore } from "@/store";
 import { projects } from "@/data/projects";
 
+// --- LA SOLUTION EST ICI ---
+// On crée le lecteur EN DEHORS du composant.
+// Il devient unique et global. React ne peut plus le dupliquer.
+const globalAudio = typeof window !== "undefined" ? new Audio() : null;
+
 export const MusicManager = () => {
   const { isMuted, activeProject } = useStore();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 1. Initialisation de l'objet Audio (une seule fois)
+  // 1. Configuration initiale (Volume / Loop)
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      audioRef.current = new Audio();
-      audioRef.current.loop = true; // Musique en boucle ? (À toi de voir)
-      audioRef.current.volume = 0.5;
+    if (globalAudio) {
+      globalAudio.loop = true;
+      globalAudio.volume = 0.5;
     }
+    
+    // Sécurité : Quand on quitte le site, on coupe tout
+    return () => {
+      if (globalAudio) globalAudio.pause();
+    };
   }, []);
 
-  // 2. Gestion Play / Pause / Changement de piste
+  // 2. Gestion de la lecture
   useEffect(() => {
-    if (!audioRef.current) return;
+    if (!globalAudio) return;
 
-    // CAS A : Tout couper (Mute activé OU Pas de vinyle sur la platine)
+    // SCÉNARIO 1 : On doit couper le son
+    // Si Mute est activé OU qu'aucun projet n'est sélectionné
     if (isMuted || activeProject === null) {
-      audioRef.current.pause();
+      globalAudio.pause();
       return;
     }
 
-    // CAS B : On a un vinyle et le son est ON -> On joue
+    // SCÉNARIO 2 : On doit jouer le son
     if (activeProject !== null && !isMuted) {
-      // On récupère le chemin de la musique du projet
-      const musicPath = projects[activeProject].audio; // Assure-toi que tes projets ont une propriété "music"
+      const project = projects[activeProject];
       
-      // Si c'est une nouvelle musique, on change la source
-      // (On compare src pour éviter de recharger si c'est déjà la bonne)
-      if (!audioRef.current.src.includes(musicPath)) {
-         audioRef.current.src = musicPath;
-         audioRef.current.load();
+      // Sécurité : Si le projet n'a pas de fichier audio, on coupe
+      if (!project || !project.audio) {
+          globalAudio.pause();
+          return;
       }
 
-      // On lance la lecture
-      const playPromise = audioRef.current.play();
+      const musicPath = project.audio;
+
+      // Est-ce qu'on change de musique ou c'est la même ?
+      // On compare l'URL actuelle avec la nouvelle pour éviter de redémarrer le morceau à 0
+      const currentSrc = globalAudio.src;
+      // L'URL dans audio.src est absolue (http://...), musicPath est relatif (/music...)
+      // Donc on vérifie si l'absolue CONTIENT la relative.
+      if (!currentSrc.includes(musicPath)) {
+         globalAudio.src = musicPath;
+         globalAudio.load();
+      }
+
+      // On lance la lecture (avec gestion d'erreur navigateur)
+      const playPromise = globalAudio.play();
       if (playPromise !== undefined) {
         playPromise.catch((error) => {
-          console.log("Lecture bloquée par le navigateur (normal au début):", error);
+          console.warn("Autoplay bloqué (normal si pas d'interaction):", error);
         });
       }
     }
-  }, [isMuted, activeProject]); // <-- Ce useEffect se relance à chaque changement d'état
+  }, [isMuted, activeProject]); // Se relance quand ces variables changent
 
-  return null; // Ce composant n'affiche rien, il gère juste le son
+  return null;
 };
