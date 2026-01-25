@@ -18,7 +18,6 @@ function Polaroid({ item, activeId, setActiveId }: any) {
   const isActive = activeId === item.id;
   const isOtherActive = activeId !== null && activeId !== item.id;
   
-  // ✅ On récupère setFocus pour pouvoir changer la caméra
   const { focus, setFocus } = useStore(); 
   
   const texture = useTexture(item.img);
@@ -45,20 +44,25 @@ function Polaroid({ item, activeId, setActiveId }: any) {
       position={[item.x, item.y, 0.05]}
       rotation={[0, 0, item.rot]}
       
-      // --- C'EST ICI QUE ÇA SE PASSE ---
+      // --- CORRECTION DU CLIC ---
       onClick={(e) => {
-        e.stopPropagation(); // On arrête le clic ici quoi qu'il arrive
+        e.stopPropagation(); 
 
         if (focus !== 'board') {
-            // CAS 1 : On est loin -> On zoome sur le board
+            // 1. Si on est loin, on zoome d'abord
             setFocus('board');
         } else {
-            // CAS 2 : On est déjà sur le board -> On ouvre la photo
-            if (!isActive) setActiveId(item.id);
+            // 2. Si on est déjà sur le board...
+            if (isActive) {
+                // ...et que c'est ouvert : ON FERME !
+                setActiveId(null);
+            } else {
+                // ...et que c'est fermé : ON OUVRE !
+                setActiveId(item.id);
+            }
         }
       }}
 
-      // On laisse le curseur pointer même de loin pour montrer que c'est cliquable
       onPointerOver={(e) => {
         e.stopPropagation();
         document.body.style.cursor = 'pointer';
@@ -119,6 +123,7 @@ function Polaroid({ item, activeId, setActiveId }: any) {
         </Html>
       )}
 
+      {/* CLIC EXTERIEUR (Fond invisible) pour fermer si on clique à côté */}
       {isActive && (
          <mesh position={[0, 0, -0.1]} scale={[10, 10, 1]} onClick={(e) => { e.stopPropagation(); setActiveId(null); }}>
              <planeGeometry args={[10, 10]} />
