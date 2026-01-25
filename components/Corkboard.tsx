@@ -1,12 +1,10 @@
-/* DANS src/components/Corkboard.tsx */
 import React, { useState, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, Text, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { useStore } from "@/store"; // 👈 IMPORT DU STORE
+import { useStore } from "@/store"; 
 
 const ITEMS = [
-  // ... tes items (je garde ta liste intacte)
   { id: 1, type: 'video', title: 'ALLEMANDE SANS TOIT - mewa', videoId: 'T5KjYfrZYhY', img: '/textures/allemande1.jpg', x: -0.7, y: 0.4, rot: 0.05 },
   { id: 2, type: 'video', title: 'plus que tu le peux - mewa', videoId: 'l7J-TIg_ViQ', img: '/textures/plus1.jpg', x: 0.0, y: 0.45, rot: -0.02 },
   { id: 3, type: 'video', title: 'moi ou eux - mewa', videoId: 'wHL7i1zGLDk', img: '/textures/moi.jpg', x: 0.7, y: 0.35, rot: 0.08 },
@@ -20,8 +18,8 @@ function Polaroid({ item, activeId, setActiveId }: any) {
   const isActive = activeId === item.id;
   const isOtherActive = activeId !== null && activeId !== item.id;
   
-  // 1. On récupère le focus global pour savoir si on a le droit d'interagir
-  const focus = useStore((state) => state.focus);
+  // ✅ On récupère setFocus pour pouvoir changer la caméra
+  const { focus, setFocus } = useStore(); 
   
   const texture = useTexture(item.img);
 
@@ -31,7 +29,6 @@ function Polaroid({ item, activeId, setActiveId }: any) {
     const targetRot = new THREE.Euler(0, 0, item.rot); 
 
     if (isActive) {
-      // Zoom du Polaroid vers la caméra
       targetPos.set(0, 0, 2.5); 
       targetRot.set(0, 0, 0); 
     }
@@ -48,19 +45,21 @@ function Polaroid({ item, activeId, setActiveId }: any) {
       position={[item.x, item.y, 0.05]}
       rotation={[0, 0, item.rot]}
       
-      // --- LOGIQUE DE SÉCURITÉ UX ---
+      // --- C'EST ICI QUE ÇA SE PASSE ---
       onClick={(e) => {
-        // Si on n'est pas zoomé sur le board, on laisse le clic traverser (pour activer le zoom global)
-        if (focus !== 'board') return;
+        e.stopPropagation(); // On arrête le clic ici quoi qu'il arrive
 
-        // Sinon, on capture le clic et on active le Polaroid
-        e.stopPropagation();
-        if (!isActive) setActiveId(item.id);
+        if (focus !== 'board') {
+            // CAS 1 : On est loin -> On zoome sur le board
+            setFocus('board');
+        } else {
+            // CAS 2 : On est déjà sur le board -> On ouvre la photo
+            if (!isActive) setActiveId(item.id);
+        }
       }}
 
+      // On laisse le curseur pointer même de loin pour montrer que c'est cliquable
       onPointerOver={(e) => {
-        // Pas de curseur "main" si on est loin
-        if (focus !== 'board') return;
         e.stopPropagation();
         document.body.style.cursor = 'pointer';
       }}
@@ -68,15 +67,12 @@ function Polaroid({ item, activeId, setActiveId }: any) {
       onPointerOut={(e) => {
          document.body.style.cursor = 'auto';
       }}
-      // -----------------------------
-
+      
       scale={isActive ? 1.5 : 1} 
     >
-      {/* CADRE BLANC */}
       <boxGeometry args={[0.6, 0.75, 0.01]} />
       <meshStandardMaterial color="#f0f0f0" roughness={0.5} />
 
-      {/* IMAGE */}
       <mesh position={[0, 0.08, 0.01]}>
         <planeGeometry args={[0.5, 0.5]} />
         <meshStandardMaterial 
@@ -90,7 +86,6 @@ function Polaroid({ item, activeId, setActiveId }: any) {
         />
       </mesh>
 
-      {/* TITRE */}
       <Text
         position={[0, -0.28, 0.02]} 
         fontSize={0.035}
@@ -101,7 +96,6 @@ function Polaroid({ item, activeId, setActiveId }: any) {
         {item.title.toUpperCase()}
       </Text>
 
-      {/* MODAL VIDEO */}
       {isActive && item.type === 'video' && (
         <Html transform position={[0, 0.05, 0.02]} scale={0.12}>
           <div className="w-[450px] flex flex-col shadow-2xl rounded-lg overflow-hidden">
@@ -125,7 +119,6 @@ function Polaroid({ item, activeId, setActiveId }: any) {
         </Html>
       )}
 
-      {/* CLIC EXTERIEUR POUR FERMER (ZONE INVISIBLE) */}
       {isActive && (
          <mesh position={[0, 0, -0.1]} scale={[10, 10, 1]} onClick={(e) => { e.stopPropagation(); setActiveId(null); }}>
              <planeGeometry args={[10, 10]} />
@@ -133,7 +126,6 @@ function Polaroid({ item, activeId, setActiveId }: any) {
          </mesh>
       )}
 
-      {/* Punaise */}
       <mesh position={[0, 0.35, 0.01]}>
         <sphereGeometry args={[0.02, 16, 16]} />
         <meshStandardMaterial color="#d93025" roughness={0.3} />
@@ -146,7 +138,6 @@ export function Corkboard(props: any) {
   const [activeId, setActiveId] = useState<number | null>(null);
   const focus = useStore((state) => state.focus);
 
-  // Sécurité supplémentaire : Si l'utilisateur dézoome (repart sur 'intro'), on ferme tout
   useEffect(() => {
     if (focus !== 'board') {
         setActiveId(null);
@@ -155,7 +146,6 @@ export function Corkboard(props: any) {
 
   return (
     <group {...props}>
-      {/* PLANCHE DE LIÈGE */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[2.4, 1.8, 0.05]} />
         <meshStandardMaterial color="#3d2817" roughness={0.8} />
@@ -166,7 +156,6 @@ export function Corkboard(props: any) {
         <meshStandardMaterial color="#a67b5b" roughness={1} /> 
       </mesh>
 
-      {/* ITEMS */}
       <group position={[0, 0, 0.05]}>
         {ITEMS.map((item) => (
           <Polaroid key={item.id} item={item} activeId={activeId} setActiveId={setActiveId} />
