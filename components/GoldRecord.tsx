@@ -1,8 +1,7 @@
 "use client";
 
-import { GroupProps } from "@react-three/fiber";
 
-export const GoldRecord = (props: GroupProps) => {
+export const GoldRecord = (props: any) => {
   return (
     <group {...props}>
       {/* CADRE NOIR */}
