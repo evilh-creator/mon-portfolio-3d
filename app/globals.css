@@ -36,14 +36,14 @@ html, body, #root {
 }
 
 /* =========================================
-   BOUTON CONTACT (BAS DROITE - CORRECTIF)
+   BOUTON CONTACT (BAS DROITE)
    ========================================= */
 .contact-container {
   position: fixed;
   bottom: 3rem; 
   right: 3rem;  
-  z-index: 9999; /* Très haut pour passer au-dessus de tout */
-  pointer-events: auto !important; /* Force le bouton à être cliquable */
+  z-index: 9999;
+  pointer-events: auto !important;
 }
 
 .contact-link {
@@ -65,7 +65,6 @@ html, body, #root {
 /* =========================================
    CONTENEURS TEXTE (GAUCHE)
    ========================================= */
-/* Utilise cette classe pour Poster, Skills, Experience, Projets, Rack */
 .poster-container, 
 .skills-container, 
 .experience-container,
@@ -75,11 +74,13 @@ html, body, #root {
   top: 0;
   left: 0;
   height: 100vh;
-  /* Largeur fixe et étroite (25%) */
-  width: 25vw; 
-  min-width: 350px;
   
-  padding: 0 3rem;
+  /* --- ADAPTATION 13 POUCES --- */
+  /* Sur un grand écran : 25% */
+  /* Sur un 13 pouces : on élargit un peu (30vw) pour que le texte respire */
+  width: clamp(350px, 30vw, 500px); 
+  
+  padding: 0 clamp(1.5rem, 4vw, 3rem); /* Padding adaptatif */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -87,35 +88,41 @@ html, body, #root {
   text-align: left;
   
   z-index: 20;
-  pointer-events: auto; /* Permet de cliquer sur les liens */
+  pointer-events: auto;
   
-  /* Fond vitré */
   background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%);
   backdrop-filter: blur(10px);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* =========================================
-   TYPOGRAPHIE
+   TYPOGRAPHIE RESPONSIVE (MAGIQUE)
    ========================================= */
+/* La fonction clamp(MIN, IDEAL, MAX) calcule la taille parfaite */
+
 .poster-title, 
 .skills-title, 
 .experience-title,
 .rack-title,
 .project-title {
-  font-size: 3.5rem; /* Ajusté pour éviter d'être trop énorme */
+  /* Min: 2rem (Mobile) | Idéal: 4% de l'écran | Max: 4rem (Grand écran) */
+  font-size: clamp(2rem, 4vw, 4rem); 
+  
   font-weight: 800;
-  line-height: 0.9;
+  line-height: 1.1; /* Un peu plus aéré pour les petits écrans */
   letter-spacing: -0.04em;
   text-transform: uppercase;
   color: white;
-  margin-bottom: 2rem;
+  
+  margin-bottom: clamp(1rem, 2vw, 2rem); /* Marge fluide */
 }
 
 .project-desc, 
 .poster-bio, 
 .experience-desc {
-  font-size: 1rem;
+  /* Min: 0.9rem | Idéal: 1.1vw | Max: 1.1rem */
+  font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+  
   line-height: 1.6;
   max-width: 600px;
   color: rgba(255, 255, 255, 0.8);
@@ -140,28 +147,27 @@ html, body, #root {
   top: 0;
   right: 0;
   height: 100vh;
-  width: 75vw; /* Occupe le reste de l'écran */
+  /* Prend tout ce qui n'est pas pris par le menu de gauche */
+  width: calc(100vw - clamp(350px, 30vw, 500px)); 
+  
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none; /* Laisse passer les clics autour */
+  pointer-events: none;
   padding-right: 2rem;
 }
 
-/* --- LE CADRE RECTANGLE (CORRIGÉ) --- */
 .gallery-rect-wrapper {
   position: relative;
-  pointer-events: auto !important; /* Force le clic à l'intérieur */
-  
-  /* TAILLE FIXE LIMITÉE */
+  pointer-events: auto !important;
   width: 100%;
-  max-width: 500px;      /* <-- Limite la largeur (taille carte postale) */
-  aspect-ratio: 16 / 9;  /* <-- Force le format rectangle */
   
-  /* BORDS GRIS (Background) */
-  background-color: #1f1f1f; /* <-- Couleur des bandes si l'image ne remplit pas */
+  /* Taille max adaptée aux laptops */
+  max-width: clamp(400px, 50vw, 600px); 
+  aspect-ratio: 16 / 9;
   
+  background-color: #1f1f1f;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
@@ -169,14 +175,10 @@ html, body, #root {
   z-index: 50;
 }
 
-/* L'IMAGE (Visible en entier) */
 .gallery-image {
   width: 100%;
   height: 100%;
-  
-  /* CONTAIN = On voit toute l'image, les vides montrent le background gris */
   object-fit: contain; 
-  
   display: block;
   opacity: 0;
   animation: fadeInScale 0.5s ease-out forwards;
@@ -187,31 +189,24 @@ html, body, #root {
   to { opacity: 1; transform: scale(1); }
 }
 
-/* --- FLÈCHES DE NAVIGATION --- */
+/* FLÈCHES ET COMPTEUR */
 .gallery-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  
   background: rgba(0, 0, 0, 0.7); 
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  
   display: flex; 
   align-items: center;
   justify-content: center;
-  
   cursor: pointer;
   transition: all 0.2s ease;
-  
-  /* INDISPENSABLE POUR CLIQUER */
   z-index: 100; 
   pointer-events: auto !important; 
-  
   opacity: 1; 
 }
 
@@ -236,7 +231,7 @@ html, body, #root {
   z-index: 20;
 }
 
-/* --- TEXTE SUR IMAGE (POUR LE RACK) --- */
+/* TEXTE SUR IMAGE */
 .tech-info-overlay {
   position: absolute;
   bottom: 0;
@@ -249,7 +244,7 @@ html, body, #root {
 }
 
 .tech-title {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
   font-weight: 800;
   text-transform: uppercase;
   line-height: 1;
@@ -262,9 +257,7 @@ html, body, #root {
   color: #ffffff;
 }
 
-/* =========================================
-   SCROLLBAR (CUSTOM)
-   ========================================= */
+/* SCROLLBAR */
 .custom-scrollbar {
   overflow-y: auto !important;
   scrollbar-width: thin;
@@ -285,57 +278,26 @@ html, body, #root {
   border-radius: 10px;
 }
 
-/* =========================================
-   MEDIA QUERIES
-   ========================================= */
-@media (max-width: 1024px) {
-  .poster-container,
-  .skills-container,
-  .experience-container,
-  .project-container,
-  .rack-container {
-    width: 100%;
-    padding: 2rem;
-    background: rgba(0,0,0,0.9);
-  }
-  
-  .gallery-viewer {
-    display: none; /* On cache la galerie sur mobile pour simplifier, ou on la passe en dessous */
-  }
-}
-/* DANS globals.css */
-
-/* DANS globals.css */
-
-/* --- NAVIGATION BASSE (PROJETS) --- */
+/* NAVIGATION BASSE */
 .project-nav-bottom {
   position: fixed;
-  bottom: 3rem !important; /* <--- LE POINT CLÉ : Force le bas de page */
+  bottom: clamp(1.5rem, 5vh, 3rem);
   left: 50%;
   transform: translateX(-50%);
-  
   display: flex;
   align-items: center;
   gap: 2rem;
-  
-  z-index: 200; /* Au-dessus de tout */
+  z-index: 200; 
   pointer-events: auto !important;
-  
-  /* DESIGN : Style "Glass" plus visible */
- /* Gris foncé presque opaque */
   padding: 12px 30px;
   border-radius: 50px;
- /* Bordure blanche visible */
   box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
 .nav-btn-text {
   background: none;
   border: none;
-  
-  /* TEXTE BLANC FORCÉ */
   color: white !important; 
-  
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -350,44 +312,57 @@ html, body, #root {
 .nav-btn-text:hover {
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
   transform: scale(1.05);
-  color: #ffffff !important; /* Petite touche orange au survol */
+  color: #ffffff !important; 
 }
-/* --- RESPONSIVE MOBILE --- */
-@media (max-width: 850px) {
-  
-  /* Titre Principal plus petit */
-  .title-main {
-    font-size: 3rem !important; /* Force la taille */
-    line-height: 1;
-    width: 90%;
-    left: 5%;
-    top: 10%;
-  }
 
-  /* Navigation ou overlay plus discrets */
-  .nav-button {
-    padding: 10px 15px;
-    font-size: 0.8rem;
-  }
+/* =========================================
+   MEDIA QUERIES (CORRIGÉS POUR 13 POUCES)
+   ========================================= */
 
-  /* La visionneuse de projets en bas */
-  .gallery-viewer {
-    width: 90%;
-    right: 5%;
-    bottom: 80px; /* On remonte pour ne pas être caché par la barre du navigateur */
-    flex-direction: column; /* Image au dessus du texte sur mobile */
-  }
+/* IMPORTANT : On ne passe en mode "Mobile/Tablette Verticale" qu'en dessous de 900px.
+   Donc ton 13 pouces (qui est surement > 1000px) restera en mode DESKTOP ! */
+
+@media (max-width: 900px) {
   
-  .gallery-image {
+  /* Layout global passe en colonne */
+  .poster-container,
+  .skills-container,
+  .experience-container,
+  .project-container,
+  .rack-container {
     width: 100%;
     height: auto;
-    max-height: 150px;
-    object-fit: cover;
+    min-height: 50vh; /* Prend la moitié de l'écran ou plus */
+    bottom: 0;
+    top: auto; /* On colle en bas sur mobile */
+    padding: 2rem;
+    background: linear-gradient(0deg, rgba(0,0,0,0.95) 50%, transparent 100%);
+    border-right: none;
+  }
+  
+  /* Ajustement titres mobile */
+  .poster-title, 
+  .skills-title, 
+  .experience-title {
+    font-size: 2.5rem;
   }
 
-  .tech-info-overlay {
+  /* Galerie cachée ou simplifiée sur mobile */
+  .gallery-viewer {
     position: relative;
+    width: 90%;
+    height: auto;
+    margin: 80px auto 0 auto;
+    left: auto;
+    right: auto;
+  }
+  
+  .menu-position {
     width: 100%;
+    justify-content: center;
     background: rgba(0,0,0,0.8);
+    padding: 10px 0;
+    top: 0;
+    backdrop-filter: blur(5px);
   }
 }
