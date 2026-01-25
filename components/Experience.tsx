@@ -254,8 +254,7 @@ export const Experience = (props: any) => {
                     key={project.id} image={project.image} index={index}
                     scale={0.15} position={[(index - 1) * 0.5, 0, 0]} rotation-x={-0.2}
                     onPointerEnter={() => {}}
-                    onClick={(e) => { e.stopPropagation(); setActiveProject(index); setFocus('turntable'); }}
-                />
+onClick={(e: any) => { e.stopPropagation(); setActiveProject(index); setFocus('turntable'); }}                />
                 );
             })}
             </group>
