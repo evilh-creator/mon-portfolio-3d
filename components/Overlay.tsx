@@ -220,9 +220,9 @@ export const Overlay = () => {
 
           <div className="gallery-viewer" onClick={(e) => e.stopPropagation()}>
              <div className="gallery-rect-wrapper">
-                 <img key={currentTechIndex} src={techStackData[currentTechIndex].image} alt={techStackData[currentTechIndex].name} className="gallery-image" style={{ filter: 'brightness(0.6)' }} />
+                 <img key={currentTechIndex} src={techStackData[currentTechIndex].image} alt={(techStackData[currentTechIndex]as any).name} className="gallery-image" style={{ filter: 'brightness(0.6)' }} />
                  <div className="tech-info-overlay">
-                    <h2 className="tech-title">{techStackData[currentTechIndex].name}</h2>
+                    <h2 className="tech-title">{(techStackData[currentTechIndex]as any) .name}</h2>
                     <span className="tech-desc">/// {techStackData[currentTechIndex].desc}</span>
                  </div>
                  <button className="gallery-nav-btn gallery-prev" onClick={handlePrevTech}>←</button>
