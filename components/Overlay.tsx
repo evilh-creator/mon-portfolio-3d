@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 const techStackData = [
   { id: 1, desc: "Logo Mort Aux Rats", image: "/textures/logomar.jpg" },
   { id: 2, desc: "Tee Shirt Mort Aux Rats", image: "/textures/mortauxrats.jpg" },
-  { id: 3,  desc: "Tee Shirt Vive Les Ratz", image: "/textures/vivelesratz.jpg" },
+  { id: 3,  desc: "Tee Shirt Vive Les Ratz", image: "/textures/Vivelesratz.jpg" },
   { id: 4, desc: "Tee Shirt Paye Ta Prod", image: "/textures/payetaprod.jpg" },
 ];
 
