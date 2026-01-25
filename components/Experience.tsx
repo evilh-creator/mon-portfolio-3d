@@ -118,7 +118,7 @@ export const Experience = () => {
       
       <Environment preset="city" environmentIntensity={0.1} />
 
-      <EffectComposer disableNormalPass multisampling={0}>
+      <EffectComposer multisampling={0}>
         <Noise opacity={0.15} /> 
         <Vignette eskil={false} offset={0.1} darkness={1.1} />
         <ChromaticAberration offset={new THREE.Vector2(0.002, 0.002)} radialModulation={false} modulationOffset={0} />
