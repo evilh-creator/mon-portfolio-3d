@@ -366,3 +366,21 @@ html, body, #root {
     backdrop-filter: blur(5px);
   }
 }
+.header-position {
+  position: fixed;
+  top: 2rem;       /* Exactement la même hauteur que ton menu central */
+  left: 0;
+  width: 100%;
+  padding: 0 3rem; /* C'est ici qu'on "décolle" les boutons des bords (48px) */
+  display: flex;
+  justify-content: space-between; /* Pousse les éléments aux extrémités */
+  z-index: 50;
+  pointer-events: none; /* Permet de cliquer sur la 3D au milieu */
+}
+
+/* Optionnel : Si tu veux que ce soit responsive (moins d'écart sur mobile) */
+@media (max-width: 768px) {
+  .header-position {
+    padding: 0 1.5rem;
+  }
+}

@@ -3,7 +3,7 @@
 import { useMemo, useLayoutEffect, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
 import { OrbitControls, useGLTF, useTexture, Float, Environment, Preload, PerformanceMonitor } from "@react-three/drei"; 
-import { EffectComposer, Noise, Vignette, ChromaticAberration, Bloom } from '@react-three/postprocessing';
+import { EffectComposer, Noise, Vignette, ChromaticAberration, Bloom, SMAA } from '@react-three/postprocessing';
 
 // Components
 import { Turntable } from "./Turntable";
@@ -18,6 +18,9 @@ import { LevitatingLogo } from "./LevitatingLogo";
 import { MusicManager } from "./MusicManager";
 import { Floor } from "./Floor";
 import { CameraManager } from "./CameraManager";
+import { useThree } from '@react-three/fiber';
+
+
 
 // Hooks & Data
 import { useStore, HoverItemType } from "@/store";
@@ -56,10 +59,19 @@ function Cable({ start, mid, end, color = "#111", thickness = 0.01 }: { start: n
     </mesh>
   );
 }
+function FixComposerResize() {
+  const { gl, size } = useThree();
+  useEffect(() => {
+    gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    gl.setSize(size.width, size.height);
+  }, [size, gl]);
+  return null;
+}
 
 export const Experience = (props: any) => {
   const { setFocus, focus, activeProject, setActiveProject, setHoveredItem } = useStore();
   const isMobile = useMobile();
+  
 
   // --- ÉTAT DE PERFORMANCE ---
   // Par défaut, on tente la haute qualité (true).
@@ -114,17 +126,18 @@ export const Experience = (props: any) => {
 
       <CameraManager /> 
       <MusicManager />
+      <HoverLight />
       
       <color attach="background" args={['#020202']} />
       <fogExp2 attach="fog" args={['#020202', 0.035]} /> 
-      <ambientLight intensity={0.02} color="#4a3b59" />
-      {!isMobile && <HoverLight />}
+      <ambientLight intensity={2} color="#4a3b59" />
+      
       
       {/* Lumière interactive seulement si on a la puissance nécessaire */}
      
 
       <spotLight 
-        position={[7, 5, 5]} intensity={200} color="#ff9545" 
+        position={[7, 5, 5]} intensity={400} color="#ff9545" 
         angle={0.6} penumbra={0.5} 
         // 👇 Les ombres ne s'activent que si le PC est puissant
         castShadow={enableHeavyEffects}
@@ -137,14 +150,8 @@ export const Experience = (props: any) => {
       <Environment preset="city" environmentIntensity={0.1} />
 
       {/* 👇 POST-PROCESSING : Coupé automatiquement si ça lag */}
-      {enableHeavyEffects && (
-        <EffectComposer multisampling={0}>
-            <Noise opacity={0.15} /> 
-            <Vignette eskil={false} offset={0.1} darkness={1.1} />
-            <ChromaticAberration offset={new THREE.Vector2(0.002, 0.002)} radialModulation={false} modulationOffset={0} />
-            <Bloom luminanceThreshold={0.2} mipmapBlur intensity={0.5} radius={0.4} />
-        </EffectComposer>
-      )}
+     
+
 
       <OrbitControls 
         makeDefault enabled={focus === 'intro'} enableZoom={false} enablePan={false} 

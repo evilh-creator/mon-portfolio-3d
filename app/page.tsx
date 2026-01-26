@@ -8,7 +8,7 @@ import { EffectComposer, Bloom, Noise } from "@react-three/postprocessing";
 
 export default function Home() {
   return (
-    <main className="relative h-screen w-screen bg-black overflow-hidden">
+    <main className="relative h-screen w-screen bg-black overflow-hidden bg-[#020202]">
       
       <div className="absolute top-0 left-0 w-full h-full z-[100] pointer-events-none">
          <LoadingScreen />
@@ -23,6 +23,14 @@ export default function Home() {
           // 1. QUALITÉ : On remet la netteté pour les écrans HD/Retina
           dpr={[1, 1.5]} 
           performance={{ min: 0.5 }}
+          style={{ 
+      position: 'absolute', 
+      top: 0, 
+      left: 0, 
+      width: '100vw',  // Force la largeur fenêtre
+      height: '100vh', // Force la hauteur fenêtre
+      overflow: 'hidden'
+   }}
           
           shadows={false}
           
@@ -45,13 +53,7 @@ export default function Home() {
           
           <Experience />
 
-         <EffectComposer multisampling={0}> 
-  <Bloom 
-      luminanceThreshold={0.2} 
-      luminanceSmoothing={0.9} 
-      height={300} 
-  />
-</EffectComposer>
+         
 
         </Canvas>
       </div>

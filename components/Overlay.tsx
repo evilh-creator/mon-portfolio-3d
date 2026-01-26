@@ -109,7 +109,7 @@ export const Overlay = () => {
 
       {/* 3. HEADER (RETOUR / SON) */}
       {/* 3. HEADER (RETOUR / SON) */}
-      <div className="fixed top-0 w-full p-8 flex justify-between items-start z-50 pointer-events-none">
+      <div className="fixed top-0 w-full p-16 flex justify-between items-start z-50 pointer-events-none">
         
         {/* BOUTON RETOUR */}
         <div className="pointer-events-auto mt-2">
@@ -123,7 +123,7 @@ export const Overlay = () => {
             >
                 <span className="text-xl">←</span>
                 {/* Passage de text-[10px] à text-xs + tracking-[0.2em] */}
-                <span className="text-xs font-bold uppercase tracking-[0.2em]">Retour</span>
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">BACK</span>
             </button>
             ) : <div />}
         </div>
@@ -350,9 +350,7 @@ export const Overlay = () => {
         // AJOUT DE 'h-[70vh]' et 'flex-col' pour gérer la hauteur
         <div className="skills-container w-full max-w-6xl px-8 flex flex-col h-[70vh]">
             <div className="mb-6 flex items-center gap-3 flex-shrink-0">
-                 <span className="project-meta">CREATIVE</span>
-                 <span className="text-[10px] text-white/40 font-mono">///</span>
-                 <span className="project-meta">TECHNICAL</span>
+                
             </div>
 
             <h2 className="skills-title text-6xl font-bold mb-8 flex-shrink-0">SKILLS</h2>
